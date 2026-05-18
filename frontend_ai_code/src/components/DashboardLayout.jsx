@@ -3,17 +3,11 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Sidebar from './Sidebar'
 import Header from './Header'
-import useAuthStore from '../store/useAuthStore'
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const { loadUser, token, user } = useAuthStore()
   const location = useLocation()
-
-  useEffect(() => {
-    if (token && !user) loadUser()
-  }, [token, user])
 
   useEffect(() => {
     setSidebarOpen(false)

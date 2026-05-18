@@ -50,6 +50,22 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
+    year: {
+      type: Number,
+      enum: [1, 2, 3, 4],
+    },
+    department: {
+      type: String,
+    },
+    leetcodeUsername: {
+      type: String,
+    },
+    gfgUsername: {
+      type: String,
+    },
+    githubUsername: {
+      type: String,
+    },
     skills: [String],
     weakTopics: [String],
     strongTopics: [String],

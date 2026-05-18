@@ -37,14 +37,19 @@ const updateUserProfile = async (req, res) => {
       user.strongTopics = req.body.strongTopics || user.strongTopics;
       user.onboardingCompleted = req.body.onboardingCompleted !== undefined ? req.body.onboardingCompleted : user.onboardingCompleted;
 
+      // New profile fields
+      if (req.body.year !== undefined) user.year = req.body.year;
+      if (req.body.department !== undefined) user.department = req.body.department;
+      if (req.body.leetcodeUsername !== undefined) user.leetcodeUsername = req.body.leetcodeUsername;
+      if (req.body.gfgUsername !== undefined) user.gfgUsername = req.body.gfgUsername;
+      if (req.body.githubUsername !== undefined) user.githubUsername = req.body.githubUsername;
+
       const updatedUser = await user.save();
 
-      res.json({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        onboardingCompleted: updatedUser.onboardingCompleted,
-      });
+      // Return full user (without password)
+      const userObj = updatedUser.toObject();
+      delete userObj.password;
+      res.json(userObj);
     } else {
       res.status(404).json({ message: "User not found" });
     }
