@@ -4,6 +4,7 @@ import {
   MessageSquare, Send, Plus, Hash, Users, UserPlus, LogOut, Copy, Check,
   Loader2, ChevronRight, X, Sparkles, Crown, Search
 } from 'lucide-react'
+import useGroupChatStore from '../store/useGroupChatStore'
 import useAuthStore from '../store/useAuthStore'
 
 function formatTime(ts) {
