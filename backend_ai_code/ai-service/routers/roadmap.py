@@ -12,7 +12,9 @@ async def generate_roadmap_endpoint(request: RoadmapRequest):
             role=request.targetRole,
             skills=request.skills,
             experience_level=request.experienceLevel,
-            daily_hours=request.dailyStudyHours
+            daily_hours=request.dailyStudyHours,
+            specific_track=request.specificTrack,
+            specific_role=request.specificRole,
         )
 
         milestones = [RoadmapMilestone(**m) for m in result["milestones"]]

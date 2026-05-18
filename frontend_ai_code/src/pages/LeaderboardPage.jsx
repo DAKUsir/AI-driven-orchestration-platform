@@ -1,17 +1,46 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Trophy, Crown, Medal, TrendingUp, Loader2 } from 'lucide-react'
+import { Trophy, Crown, Medal, TrendingUp, Loader2, Users, Globe2 } from 'lucide-react'
 import useLeaderboardStore from '../store/useLeaderboardStore'
 import useAuthStore from '../store/useAuthStore'
+import api from '../utils/api'
 
 export default function LeaderboardPage() {
-  const { entries, myRank, loading, fetchLeaderboard, fetchMyRank } = useLeaderboardStore()
+  const {
+    entries, groupEntries, myRank, loading, activeTab,
+    fetchLeaderboard, fetchMyRank, fetchGroupLeaderboard,
+    setActiveTab, setSelectedGroupId, selectedGroupId,
+  } = useLeaderboardStore()
   const { user } = useAuthStore()
+
+  const [groups, setGroups] = useState([])
+  const [groupsLoading, setGroupsLoading] = useState(false)
 
   useEffect(() => {
     fetchLeaderboard()
     fetchMyRank()
+    loadGroups()
   }, [])
+
+  const loadGroups = async () => {
+    setGroupsLoading(true)
+    try {
+      const { data } = await api.get('/groups')
+      setGroups(data)
+      if (data.length > 0 && !selectedGroupId) {
+        setSelectedGroupId(data[0]._id)
+      }
+    } catch {}
+    setGroupsLoading(false)
+  }
+
+  useEffect(() => {
+    if (activeTab === 'group' && selectedGroupId) {
+      fetchGroupLeaderboard(selectedGroupId)
+    }
+  }, [activeTab, selectedGroupId])
+
+  const displayEntries = activeTab === 'global' ? entries : groupEntries
 
   const getRankBadge = (i) => {
     if (i === 0) return { icon: <Crown className="w-4 h-4" />, bg: 'bg-amber-500/15 text-amber-400' }
@@ -27,8 +56,59 @@ export default function LeaderboardPage() {
         <p className="text-sm text-zinc-500 mt-1">Compete with others and earn points by completing tasks</p>
       </div>
 
+      {/* Tabs */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => setActiveTab('global')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
+            activeTab === 'global'
+              ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
+              : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
+          }`}
+        >
+          <Globe2 className="w-4 h-4" />
+          Global
+        </button>
+        <button
+          onClick={() => setActiveTab('group')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
+            activeTab === 'group'
+              ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
+              : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          My Groups
+        </button>
+      </div>
+
+      {/* Group Selector */}
+      {activeTab === 'group' && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          {groups.length === 0 && !groupsLoading && (
+            <p className="text-sm text-zinc-500">No groups yet. Create or join a group to see group rankings.</p>
+          )}
+          {groups.map((g) => (
+            <button
+              key={g._id}
+              onClick={() => {
+                setSelectedGroupId(g._id)
+                fetchGroupLeaderboard(g._id)
+              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border ${
+                selectedGroupId === g._id
+                  ? 'bg-indigo-500/12 text-indigo-400 border-indigo-500/25'
+                  : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
+              }`}
+            >
+              {g.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Your rank */}
-      {myRank && (
+      {myRank && activeTab === 'global' && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -45,9 +125,9 @@ export default function LeaderboardPage() {
       )}
 
       {/* Podium — Top 3 */}
-      {entries.length >= 3 && (
+      {displayEntries.length >= 3 && (
         <div className="grid grid-cols-3 gap-3">
-          {[entries[1], entries[0], entries[2]].map((entry, displayIdx) => {
+          {[displayEntries[1], displayEntries[0], displayEntries[2]].map((entry, displayIdx) => {
             const actualIdx = displayIdx === 0 ? 1 : displayIdx === 1 ? 0 : 2
             const heights = ['h-24', 'h-32', 'h-20']
             const colors = ['from-zinc-400 to-zinc-500', 'from-amber-400 to-amber-500', 'from-orange-400 to-orange-500']
@@ -83,7 +163,7 @@ export default function LeaderboardPage() {
       {/* Remaining entries */}
       {!loading && (
         <div className="space-y-2">
-          {entries.slice(3).map((entry, i) => {
+          {displayEntries.slice(3).map((entry, i) => {
             const rank = i + 4
             const isYou = entry._id === user?._id
             return (
@@ -115,10 +195,12 @@ export default function LeaderboardPage() {
             )
           })}
 
-          {entries.length === 0 && !loading && (
+          {displayEntries.length === 0 && !loading && (
             <div className="card p-12 text-center">
               <Trophy className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-              <p className="text-sm text-zinc-500">No leaderboard data yet. Complete tasks to earn points!</p>
+              <p className="text-sm text-zinc-500">
+                {activeTab === 'group' ? 'No group members found. Select a group above.' : 'No leaderboard data yet. Complete tasks to earn points!'}
+              </p>
             </div>
           )}
         </div>

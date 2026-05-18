@@ -13,6 +13,7 @@ import InterviewPage from './pages/InterviewPage'
 import CodeEditorPage from './pages/CodeEditorPage'
 import SettingsPage from './pages/SettingsPage'
 import IntegrationsPage from './pages/IntegrationsPage'
+import GroupChatPage from './pages/GroupChatPage'
 import DashboardLayout from './components/DashboardLayout'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/editor" element={<CodeEditorPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/integrations" element={<IntegrationsPage />} />
+        <Route path="/groups" element={<GroupChatPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

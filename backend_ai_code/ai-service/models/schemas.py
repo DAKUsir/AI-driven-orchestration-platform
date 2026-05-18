@@ -3,7 +3,7 @@ from typing import List, Optional
 
 class ChatRequest(BaseModel):
     messages: List[dict]
-    contextType: str = "roadmap"
+    contextType: str = "general"
 
 class ChatResponse(BaseModel):
     content: str
@@ -13,6 +13,8 @@ class RoadmapRequest(BaseModel):
     skills: List[str] = []
     experienceLevel: str = "beginner"
     dailyStudyHours: int = 2
+    specificTrack: Optional[str] = None
+    specificRole: Optional[str] = None
 
 class RoadmapMilestone(BaseModel):
     week: int

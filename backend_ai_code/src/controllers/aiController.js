@@ -12,26 +12,40 @@ const handleChat = async (req, res) => {
     const { message, contextType } = req.body;
     const userId = req.user.id;
 
+    // Default context type to "mentor" if not provided
+    const ctx = contextType || "mentor";
+
     // Find or create chat history for this context
-    let chat = await Chat.findOne({ userId, contextType });
+    let chat = await Chat.findOne({ userId, contextType: ctx });
 
     if (!chat) {
-      chat = await Chat.create({ userId, contextType, messages: [] });
+      chat = await Chat.create({ userId, contextType: ctx, messages: [] });
     }
 
     // Add user message to history
     chat.messages.push({ role: "user", content: message });
 
-    // Call AI service
-    const aiResponse = await aiService.chatWithMentor(chat.messages, contextType);
+    // Keep last 20 messages for context window
+    const recentMessages = chat.messages.slice(-20);
+
+    // Call AI service (uses centralized GITHUB_TOKEN)
+    const aiResponse = await aiService.chatWithMentor(recentMessages, ctx);
 
     // Add AI response to history
-    chat.messages.push({ role: "assistant", content: aiResponse.content });
+    const responseContent = aiResponse.content || aiResponse;
+    chat.messages.push({ role: "assistant", content: responseContent });
+
+    // Trim history to last 50 messages to prevent unbounded growth
+    if (chat.messages.length > 50) {
+      chat.messages = chat.messages.slice(-50);
+    }
+
     await chat.save();
 
-    res.json({ response: aiResponse.content, history: chat.messages });
+    res.json({ response: responseContent, history: chat.messages });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message });
   }
 };
 
@@ -41,13 +55,18 @@ const handleChat = async (req, res) => {
 const handleRoadmapGeneration = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
-    // Prepare data for AI
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Accept params from request body (roadmap wizard) or fall back to user profile
     const userData = {
-      targetRole: user.targetRole,
-      skills: user.skills,
-      experienceLevel: user.experienceLevel,
-      dailyStudyHours: user.dailyStudyHours,
+      targetRole: req.body.targetRole || user.targetRole || "Software Engineer",
+      skills: req.body.skills || user.skills || [],
+      experienceLevel: req.body.experienceLevel || user.experienceLevel || "beginner",
+      dailyStudyHours: req.body.dailyStudyHours || user.dailyStudyHours || 2,
+      specificTrack: req.body.specificTrack || null,
+      specificRole: req.body.specificRole || null,
     };
 
     // Call AI service
@@ -56,8 +75,8 @@ const handleRoadmapGeneration = async (req, res) => {
     // Create Roadmap entry
     const roadmap = await Roadmap.create({
       userId: req.user.id,
-      title: aiRoadmap.title || `Roadmap for ${user.targetRole}`,
-      role: user.targetRole,
+      title: aiRoadmap.title || `Roadmap for ${userData.targetRole}`,
+      role: userData.targetRole,
       durationWeeks: aiRoadmap.durationWeeks || 12,
       milestones: aiRoadmap.milestones,
       status: "active",
@@ -65,7 +84,7 @@ const handleRoadmapGeneration = async (req, res) => {
 
     // Create Task entries from AI roadmap
     if (aiRoadmap.tasks && aiRoadmap.tasks.length > 0) {
-      const taskPromises = aiRoadmap.tasks.map(task => 
+      const taskPromises = aiRoadmap.tasks.map(task =>
         Task.create({
           userId: req.user.id,
           roadmapId: roadmap._id,
@@ -75,13 +94,17 @@ const handleRoadmapGeneration = async (req, res) => {
       await Promise.all(taskPromises);
     }
 
-    // Update user's current roadmap
+    // Update user's current roadmap and profile
     user.currentRoadmap = roadmap._id;
+    if (userData.targetRole) user.targetRole = userData.targetRole;
+    if (userData.experienceLevel) user.experienceLevel = userData.experienceLevel;
+    if (userData.skills?.length) user.skills = userData.skills;
     await user.save();
 
     res.status(201).json(roadmap);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message });
   }
 };
 
@@ -90,11 +113,12 @@ const handleRoadmapGeneration = async (req, res) => {
 // @access  Private
 const handleDebug = async (req, res) => {
   try {
-    const { code, language, error } = req.body;
-    const debuggingResult = await aiService.debugCode(code, language, error);
+    const { code, language, error: codeError } = req.body;
+    const debuggingResult = await aiService.debugCode(code, language, codeError);
     res.json(debuggingResult);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const status = error.status || 500;
+    res.status(status).json({ message: error.message });
   }
 };
 

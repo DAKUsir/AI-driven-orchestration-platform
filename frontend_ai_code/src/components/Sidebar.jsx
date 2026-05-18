@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Route, Bot, Briefcase, BarChart3,
   Trophy, Settings, Puzzle, Code2, GraduationCap, LogOut, X,
-  Columns3, ChevronLeft, ChevronRight,
+  Columns3, ChevronLeft, ChevronRight, MessageSquare,
 } from 'lucide-react'
 import useAuthStore from '../store/useAuthStore'
 
@@ -25,10 +25,16 @@ const navGroups = [
     ],
   },
   {
+    label: 'Community',
+    items: [
+      { to: '/groups', icon: MessageSquare, label: 'Groups' },
+      { to: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
+    ],
+  },
+  {
     label: 'Insights',
     items: [
       { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-      { to: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
       { to: '/career', icon: Briefcase, label: 'Career' },
     ],
   },
@@ -80,7 +86,7 @@ export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) 
               <GraduationCap className="w-4 h-4 text-white" />
             </div>
             {!collapsed && (
-              <span className="font-semibold text-zinc-100 text-[15px] truncate">CodeMentor AI</span>
+              <span className="font-semibold text-zinc-100 text-[15px] truncate">CompeteCode</span>
             )}
           </div>
           <button

@@ -26,8 +26,18 @@ const chatSchema = mongoose.Schema(
     ],
     contextType: {
       type: String,
-      enum: ["roadmap", "interview", "resume", "debugging", "behavioral", "career"],
-      required: true,
+      enum: [
+        "general",
+        "mentor",
+        "code-editor",
+        "roadmap",
+        "interview",
+        "resume",
+        "debugging",
+        "behavioral",
+        "career",
+      ],
+      default: "general",
     },
   },
   {

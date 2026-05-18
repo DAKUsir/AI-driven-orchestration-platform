@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from models.schemas import DebugRequest, DebugResponse
 from services.mock_ai import debug_code
 
@@ -6,9 +6,10 @@ router = APIRouter(tags=["Debug"])
 
 
 @router.post("/debug", response_model=DebugResponse)
-async def debug_endpoint(request: DebugRequest):
+async def debug_endpoint(request_body: DebugRequest, request: Request):
     try:
-        result = debug_code(request.code, request.language, request.error)
+        custom_key = request.headers.get("x-user-api-key")
+        result = debug_code(request_body.code, request_body.language, request_body.error, custom_key)
         return DebugResponse(
             explanation=result["explanation"],
             fixedCode=result["fixedCode"],

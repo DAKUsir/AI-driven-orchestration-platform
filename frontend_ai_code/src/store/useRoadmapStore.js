@@ -7,13 +7,16 @@ const useRoadmapStore = create((set) => ({
   loading: false,
   error: null,
 
-  generateRoadmap: async () => {
+  generateRoadmap: async (params = {}) => {
     set({ loading: true, error: null })
     try {
-      const { data } = await api.post('/ai/roadmap')
+      const { data } = await api.post('/ai/roadmap', params)
       set({ roadmap: data, loading: false })
+      // Refresh tasks after generating roadmap
+      const tasksRes = await api.get('/tasks')
+      set({ tasks: tasksRes.data })
     } catch (err) {
-      set({ error: err.response?.data?.detail || 'Failed to generate roadmap', loading: false })
+      set({ error: err.response?.data?.message || err.response?.data?.detail || 'Failed to generate roadmap', loading: false })
     }
   },
 
@@ -32,6 +35,8 @@ const useRoadmapStore = create((set) => ({
       }))
     } catch {}
   },
+
+  clearRoadmap: () => set({ roadmap: null, error: null }),
 }))
 
 export default useRoadmapStore

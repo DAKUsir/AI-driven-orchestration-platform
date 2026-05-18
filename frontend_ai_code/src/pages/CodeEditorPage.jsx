@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Code2, ChevronDown, RotateCcw, Play, Bot, Send, Lightbulb,
-  MessageSquare, Terminal, Loader2, X, Sparkles, Trash2, User
+  MessageSquare, Terminal, Loader2, X, Sparkles, Trash2, User, ToggleLeft, ToggleRight
 } from 'lucide-react'
 import Editor from '@monaco-editor/react'
 import api from '../utils/api'
@@ -61,6 +61,7 @@ export default function CodeEditorPage() {
   const [aiMessages, setAiMessages] = useState([])
   const [aiInput, setAiInput] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
+  const [hintMode, setHintMode] = useState(true) // true = hints only, false = full solutions
   const bottomRef = useRef(null)
 
   useEffect(() => {
@@ -110,7 +111,12 @@ export default function CodeEditorPage() {
     setShowAI(true)
 
     try {
-      const prompt = `[Code Editor Context]\nLanguage: ${language}\n\`\`\`${language}\n${code}\n\`\`\`\n${testInput ? `\nCustom Input:\n${testInput}` : ''}\n${testOutput ? `\nOutput:\n${testOutput}` : ''}\n\nUser: ${message}`
+      const modeInstruction = hintMode
+        ? '\n\n[IMPORTANT: The user is in HINT MODE. Do NOT give the full solution. Instead, give helpful hints, guiding questions, and explain concepts that will help them solve it themselves. Point them in the right direction without writing the complete code.]'
+        : '\n\n[The user wants a full solution. Provide complete, working code with detailed explanations.]'
+
+      const prompt = `[Code Editor Context]\nLanguage: ${language}\n\`\`\`${language}\n${code}\n\`\`\`\n${testInput ? `\nCustom Input:\n${testInput}` : ''}${testOutput ? `\nOutput:\n${testOutput}` : ''}${modeInstruction}\n\nUser: ${message}`
+
       const { data } = await api.post('/ai/chat', { message: prompt, contextType: 'code-editor' })
       const aiMsg = { role: 'assistant', content: data.response }
       setAiMessages((prev) => [...prev, aiMsg])
@@ -294,10 +300,23 @@ export default function CodeEditorPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-zinc-100">AI Assistant</h3>
-                      <p className="text-[10px] text-zinc-600">Analyzes your code in real-time</p>
+                      <p className="text-[10px] text-zinc-600">Powered by GPT-4o</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
+                    {/* Hint Mode Toggle */}
+                    <button
+                      onClick={() => setHintMode(!hintMode)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all border ${
+                        hintMode
+                          ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      }`}
+                      title={hintMode ? 'Hint Mode: Only gives hints' : 'Solution Mode: Full solutions'}
+                    >
+                      <Lightbulb className="w-3 h-3" />
+                      {hintMode ? 'Hints' : 'Solutions'}
+                    </button>
                     {aiMessages.length > 0 && (
                       <button onClick={clearAI} className="btn btn-ghost btn-sm btn-icon p-1.5 text-zinc-500 hover:text-red-400">
                         <Trash2 className="w-3.5 h-3.5" />
@@ -315,9 +334,14 @@ export default function CodeEditorPage() {
                     <div className="flex flex-col items-center justify-center h-full text-center px-4">
                       <Sparkles className="w-10 h-10 text-zinc-700 mb-3" />
                       <h3 className="text-sm font-semibold text-zinc-300 mb-1">AI Code Assistant</h3>
-                      <p className="text-xs text-zinc-600 mb-5 max-w-[250px]">
+                      <p className="text-xs text-zinc-600 mb-2 max-w-[250px]">
                         Ask questions about your code, request hints, or get explanations.
                       </p>
+                      <div className={`px-2.5 py-1 rounded-lg text-[11px] font-medium mb-5 ${
+                        hintMode ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'
+                      }`}>
+                        {hintMode ? '💡 Hint Mode — guides without spoiling' : '✅ Solution Mode — full answers'}
+                      </div>
                       <div className="flex flex-wrap justify-center gap-2">
                         {[
                           'Explain this code',

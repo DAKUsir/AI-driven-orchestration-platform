@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const GroupChat = require("../models/GroupChat");
 
 const computePoints = (user) => {
   let points = 0;
@@ -14,7 +15,7 @@ const computePoints = (user) => {
 
 const getLeaderboard = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 50;
     const users = await User.find({})
       .select("name email avatar totalSolved streak longestStreak totalStudyHours skills onboardingCompleted isPremium points")
       .lean();
@@ -77,4 +78,46 @@ const getUserRank = async (req, res) => {
   }
 };
 
-module.exports = { getLeaderboard, getUserRank };
+// @desc    Get leaderboard for a specific group
+// @route   GET /api/leaderboard/group/:groupId
+// @access  Private
+const getGroupLeaderboard = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const group = await GroupChat.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    if (!group.members.includes(req.user.id)) {
+      return res.status(403).json({ message: "Not a member of this group" });
+    }
+
+    const members = await User.find({ _id: { $in: group.members } })
+      .select("name email avatar totalSolved streak longestStreak totalStudyHours skills onboardingCompleted isPremium points")
+      .lean();
+
+    const leaderboard = members.map((user) => {
+      const points = user.points || computePoints(user);
+      return {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        points,
+        streak: user.streak || 0,
+        totalSolved: user.totalSolved || 0,
+      };
+    });
+
+    leaderboard.sort((a, b) => b.points - a.points);
+    const ranked = leaderboard.map((entry, i) => ({ ...entry, rank: i + 1 }));
+
+    res.json(ranked);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getLeaderboard, getUserRank, getGroupLeaderboard };

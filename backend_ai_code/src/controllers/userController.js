@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const { encrypt } = require("../utils/crypto");
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -74,8 +75,35 @@ const getUserStats = async (req, res) => {
   }
 };
 
+// @desc    Set user's custom AI Provider API key
+// @route   POST /api/users/ai-provider
+// @access  Private
+const setAiProviderKey = async (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    
+    if (!apiKey) {
+      return res.status(400).json({ message: "API key is required" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Encrypt and save the API key
+    user.customAiApiKey = encrypt(apiKey);
+    await user.save();
+
+    res.json({ message: "AI Provider connected successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getUserProfile,
   updateUserProfile,
   getUserStats,
+  setAiProviderKey,
 };
