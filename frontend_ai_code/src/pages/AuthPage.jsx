@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { GraduationCap, Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Target, Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react'
 import useAuthStore from '../store/useAuthStore'
 
 export default function AuthPage() {
@@ -64,13 +64,13 @@ export default function AuthPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 mb-5">
-            <GraduationCap className="w-6 h-6 text-white" />
+            <Target className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl font-bold text-zinc-100">
             {isLogin ? 'Welcome back' : 'Create account'}
           </h1>
           <p className="text-sm text-zinc-500 mt-1">
-            {isLogin ? 'Sign in to continue your journey' : 'Start your interview preparation'}
+            {isLogin ? 'Sign in to continue your journey' : 'Start finishing what you start'}
           </p>
         </div>
 

@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, Route, Bot, Briefcase, BarChart3,
-  Trophy, Settings, Puzzle, Code2, GraduationCap, LogOut, X,
-  Columns3, ChevronLeft, ChevronRight, MessageSquare,
+  LayoutDashboard, CheckSquare, Calendar, Swords, BookOpen,
+  Trophy, Settings, Puzzle, MessageSquare, LogOut, X,
+  ChevronLeft, ChevronRight, Target, GraduationCap, Briefcase, Code2,
+  PlayCircle,
 } from 'lucide-react'
 import useAuthStore from '../store/useAuthStore'
 
@@ -12,15 +13,23 @@ const navGroups = [
     label: 'Overview',
     items: [
       { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { to: '/roadmap', icon: Route, label: 'Roadmap' },
-      { to: '/kanban', icon: Columns3, label: 'Kanban Board' },
+      { to: '/planner', icon: CheckSquare, label: 'Task Planner' },
+      { to: '/calendar', icon: Calendar, label: 'Calendar' },
     ],
   },
   {
-    label: 'Practice',
+    label: 'Discover',
     items: [
-      { to: '/mentor', icon: Bot, label: 'AI Mentor' },
-      { to: '/interview', icon: Code2, label: 'Mock Interview' },
+      { to: '/competitions', icon: Swords, label: 'Competitions' },
+      { to: '/dsa-sheets', icon: BookOpen, label: 'DSA Sheets' },
+    ],
+  },
+  {
+    label: 'Tools',
+    items: [
+      { to: '/youtube', icon: PlayCircle, label: 'YouTube Dashboard' },
+      { to: '/courses', icon: GraduationCap, label: 'Course Tracker' },
+      { to: '/career', icon: Briefcase, label: 'Resume Analyzer' },
       { to: '/editor', icon: Code2, label: 'Code Editor' },
     ],
   },
@@ -29,13 +38,6 @@ const navGroups = [
     items: [
       { to: '/groups', icon: MessageSquare, label: 'Groups' },
       { to: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
-    ],
-  },
-  {
-    label: 'Insights',
-    items: [
-      { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-      { to: '/career', icon: Briefcase, label: 'Career' },
     ],
   },
   {
@@ -83,10 +85,10 @@ export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) 
         <div className="flex items-center justify-between h-16 px-4 border-b border-zinc-800/60 flex-shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center flex-shrink-0">
-              <GraduationCap className="w-4 h-4 text-white" />
+              <Target className="w-4 h-4 text-white" />
             </div>
             {!collapsed && (
-              <span className="font-semibold text-zinc-100 text-[15px] truncate">CompeteCode</span>
+              <span className="font-semibold text-zinc-100 text-[15px] truncate">FinishIt</span>
             )}
           </div>
           <button

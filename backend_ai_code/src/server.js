@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+dotenv.config();
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -13,23 +14,28 @@ const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 
 const connectDB = require("./config/db");
+
+// ── Route imports ──
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const roadmapRoutes = require("./routes/roadmapRoutes");
 const taskRoutes = require("./routes/taskRoutes");
-const aiRoutes = require("./routes/aiRoutes");
-const analyticsRoutes = require("./routes/analyticsRoutes");
-const resumeRoutes = require("./routes/resumeRoutes");
-const interviewRoutes = require("./routes/interviewRoutes");
+const streakRoutes = require("./routes/streakRoutes");
+const competitionRoutes = require("./routes/competitionRoutes");
+const sheetRoutes = require("./routes/sheetRoutes");
+const dailyReviewRoutes = require("./routes/dailyReviewRoutes");
+const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const integrationRoutes = require("./routes/integrationRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-const leaderboardRoutes = require("./routes/leaderboardRoutes");
 const groupChatRoutes = require("./routes/groupChatRoutes");
+const resumeRoutes = require("./routes/resumeRoutes");
+const courseRoutes = require("./routes/courseRoutes");
+const aiRoutes = require("./routes/aiRoutes");
+const youtubeRoutes = require("./routes/youtubeRoutes");
 
 const GroupChat = require("./models/GroupChat");
 const User = require("./models/User");
 
-dotenv.config();
+
 
 // Connect to database
 connectDB();
@@ -75,32 +81,33 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Routes
+// ── Routes ──
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/roadmap", roadmapRoutes);
 app.use("/api/tasks", taskRoutes);
-app.use("/api/ai", aiRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/resume", resumeRoutes);
-app.use("/api/interview", interviewRoutes);
+app.use("/api/streaks", streakRoutes);
+app.use("/api/competitions", competitionRoutes);
+app.use("/api/sheets", sheetRoutes);
+app.use("/api/daily-reviews", dailyReviewRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/integrations", integrationRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/groups", groupChatRoutes);
+app.use("/api/resume", resumeRoutes);
+app.use("/api/courses", courseRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/integrations/youtube", youtubeRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Backend API Running");
+  res.send("FinishIt API Running");
 });
 
 // ── Socket.IO Authentication & Events ────────────────────────────────
-const onlineUsers = new Map(); // socketId -> { userId, userName }
+const onlineUsers = new Map();
 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
-  if (!token) {
-    return next(new Error("Authentication required"));
-  }
+  if (!token) return next(new Error("Authentication required"));
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     socket.userId = decoded.id;
@@ -113,7 +120,6 @@ io.use((socket, next) => {
 io.on("connection", async (socket) => {
   const userId = socket.userId;
 
-  // Get user info
   try {
     const user = await User.findById(userId).select("name email avatar");
     if (user) {
@@ -131,7 +137,6 @@ io.on("connection", async (socket) => {
   // Join a group room
   socket.on("join-room", async (groupId) => {
     socket.join(groupId);
-    // Notify others
     const userInfo = onlineUsers.get(socket.id);
     if (userInfo) {
       socket.to(groupId).emit("user-joined", {
@@ -140,7 +145,6 @@ io.on("connection", async (socket) => {
       });
     }
 
-    // Send list of online members in this room
     const roomSockets = await io.in(groupId).fetchSockets();
     const onlineMembers = roomSockets
       .map((s) => onlineUsers.get(s.id))
@@ -176,10 +180,8 @@ io.on("connection", async (socket) => {
       group.messages.push(message);
       await group.save();
 
-      // Get sender info
       const sender = await User.findById(userId).select("name email avatar");
 
-      // Broadcast to room
       io.to(groupId).emit("new-message", {
         _id: group.messages[group.messages.length - 1]._id,
         sender: {
@@ -229,7 +231,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`FinishIt API running on port ${PORT}`);
 });
 
 module.exports = app;

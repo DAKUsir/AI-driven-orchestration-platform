@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { Target, ArrowRight, ArrowLeft, Check, GraduationCap, Terminal, Globe, Layers, Code2, Sparkles } from 'lucide-react'
+import { Target, ArrowRight, ArrowLeft, Check, Sparkles } from 'lucide-react'
 import api from '../utils/api'
 import useAuthStore from '../store/useAuthStore'
 
 const steps = [
   {
     title: 'Your Goal',
-    subtitle: 'What do you want to achieve?',
+    subtitle: 'What are you working toward?',
     options: [
       { value: 'faang', label: 'FAANG Prep', desc: 'Ace interviews at top tech companies' },
       { value: 'fullstack', label: 'Full-Stack Mastery', desc: 'Become a confident full-stack developer' },
@@ -17,22 +17,26 @@ const steps = [
     ],
   },
   {
-    title: 'Experience Level',
-    subtitle: 'Where are you in your journey?',
+    title: 'Available Hours',
+    subtitle: 'How many hours can you study per day?',
     options: [
-      { value: 'beginner', label: 'Beginner', desc: '0–6 months of coding' },
-      { value: 'intermediate', label: 'Intermediate', desc: '6 months – 2 years' },
-      { value: 'advanced', label: 'Advanced', desc: '2+ years of experience' },
+      { value: '1', label: '1 hour', desc: 'Busy schedule, micro-learning' },
+      { value: '2', label: '2 hours', desc: 'Balanced study routine' },
+      { value: '4', label: '4 hours', desc: 'Dedicated daily study blocks' },
+      { value: '6', label: '6+ hours', desc: 'Full-time preparation mode' },
     ],
   },
   {
-    title: 'Focus Areas',
-    subtitle: 'What topics interest you most?',
+    title: 'Preferred Platforms',
+    subtitle: 'Where do you learn most? (pick all that apply)',
+    multi: true,
     options: [
-      { value: 'algorithms', label: 'Algorithms', desc: 'Sorting, searching, DP, graphs' },
-      { value: 'system-design', label: 'System Design', desc: 'Scalability, architecture, patterns' },
-      { value: 'frontend', label: 'Frontend', desc: 'React, CSS, performance' },
-      { value: 'backend', label: 'Backend', desc: 'APIs, databases, microservices' },
+      { value: 'youtube', label: 'YouTube', desc: 'Video tutorials & courses' },
+      { value: 'leetcode', label: 'LeetCode', desc: 'Coding problems & contests' },
+      { value: 'coursera', label: 'Coursera / Udemy', desc: 'Structured online courses' },
+      { value: 'github', label: 'GitHub', desc: 'Open source & projects' },
+      { value: 'gfg', label: 'GeeksforGeeks', desc: 'Articles & problem sets' },
+      { value: 'kaggle', label: 'Kaggle', desc: 'Data science & ML notebooks' },
     ],
   },
 ]
@@ -40,26 +44,41 @@ const steps = [
 export default function OnboardingPage() {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({})
+  const [multiSelect, setMultiSelect] = useState([])
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { loadUser } = useAuthStore()
 
   const selectOption = (key) => {
-    setAnswers((prev) => ({ ...prev, [steps[step].title]: key }))
+    if (steps[step].multi) {
+      setMultiSelect((prev) =>
+        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+      )
+    } else {
+      setAnswers((prev) => ({ ...prev, [steps[step].title]: key }))
+    }
   }
 
   const handleNext = () => {
+    if (steps[step].multi) {
+      setAnswers((prev) => ({ ...prev, [steps[step].title]: multiSelect }))
+      setMultiSelect([])
+    }
     if (step < steps.length - 1) setStep(step + 1)
   }
 
   const handleFinish = async () => {
     setLoading(true)
+    const finalAnswers = { ...answers }
+    if (steps[step].multi) {
+      finalAnswers[steps[step].title] = multiSelect
+    }
     try {
       const payload = {
         onboardingCompleted: true,
-        targetRole: answers['Your Goal'],
-        experienceLevel: answers['Experience Level'],
-        skills: answers['Focus Areas'] ? [answers['Focus Areas']] : [],
+        studyGoal: finalAnswers['Your Goal'] || '',
+        availableHours: parseInt(finalAnswers['Available Hours']) || 2,
+        preferredPlatforms: finalAnswers['Preferred Platforms'] || [],
       }
       await api.patch('/users/profile', payload)
       await loadUser()
@@ -70,23 +89,20 @@ export default function OnboardingPage() {
   }
 
   const currentStep = steps[step]
-  const selected = answers[currentStep.title]
+  const selected = currentStep.multi ? multiSelect : answers[currentStep.title]
+  const hasSelection = currentStep.multi ? multiSelect.length > 0 : !!selected
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#09090b' }}>
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px]" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-lg"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative w-full max-w-lg">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
-            <GraduationCap className="w-4 h-4 text-white" />
+            <Target className="w-4 h-4 text-white" />
           </div>
-          <span className="font-semibold text-zinc-100 text-[15px]">CodeMentor AI</span>
+          <span className="font-semibold text-zinc-100 text-[15px]">FinishIt</span>
         </div>
 
         {/* Progress */}
@@ -121,7 +137,9 @@ export default function OnboardingPage() {
 
               <div className="space-y-2.5">
                 {currentStep.options.map((opt) => {
-                  const isSelected = selected === opt.value
+                  const isSelected = currentStep.multi
+                    ? multiSelect.includes(opt.value)
+                    : selected === opt.value
                   return (
                     <button
                       key={opt.value}
@@ -132,7 +150,7 @@ export default function OnboardingPage() {
                           : 'border-zinc-800 hover:border-zinc-700 bg-zinc-900/50'
                       }`}
                     >
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                      <div className={`w-5 h-5 rounded-${currentStep.multi ? 'md' : 'full'} border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                         isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-700'
                       }`}>
                         {isSelected && <Check className="w-3 h-3 text-white" />}
@@ -161,19 +179,11 @@ export default function OnboardingPage() {
             </button>
 
             {step < steps.length - 1 ? (
-              <button
-                onClick={handleNext}
-                disabled={!selected}
-                className="btn btn-primary btn-sm"
-              >
+              <button onClick={handleNext} disabled={!hasSelection} className="btn btn-primary btn-sm">
                 Next <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
-              <button
-                onClick={handleFinish}
-                disabled={loading || !selected}
-                className="btn btn-primary btn-sm"
-              >
+              <button onClick={handleFinish} disabled={loading || !hasSelection} className="btn btn-primary btn-sm">
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (

@@ -6,19 +6,15 @@ import uvicorn
 import os
 import time
 
-from routers.chat import router as chat_router
-from routers.roadmap import router as roadmap_router
+from routers.planner import router as planner_router
 from routers.resume import router as resume_router
-from routers.debug import router as debug_router
-from routers.interview import router as interview_router
-from routers.leaderboard import router as leaderboard_router
 
 load_dotenv()
 
 app = FastAPI(
-    title="AI Code Platform - AI Service",
-    description="AI-powered orchestration backend for coding interview preparation",
-    version="2.0.0",
+    title="FinishIt - AI Planning Service",
+    description="AI-powered task planning, prioritization, and review",
+    version="3.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -52,19 +48,20 @@ async def global_exception_handler(request: Request, exc: Exception):
 @app.get("/")
 async def root():
     return {
-        "service": "AI Code Platform - AI Service",
-        "version": "2.0.0",
+        "service": "FinishIt - AI Planning Service",
+        "version": "3.0.0",
         "status": "running",
         "endpoints": {
-            "chat": "/chat",
-            "generate-roadmap": "/generate-roadmap",
-            "analyze-resume": "/analyze-resume",
-            "debug": "/debug",
-            "interview": "/interview",
-            "leaderboard": "/leaderboard",
+            "break-task": "/api/break-task",
+            "prioritize-day": "/api/prioritize-day",
+            "weekly-review": "/api/weekly-review",
+            "reschedule": "/api/reschedule",
             "docs": "/docs",
         }
     }
+
+
+start_time = time.time()
 
 
 @app.get("/health")
@@ -76,14 +73,8 @@ async def health():
     }
 
 
-start_time = time.time()
-
-app.include_router(chat_router, prefix="/api")
-app.include_router(roadmap_router, prefix="/api")
-app.include_router(resume_router, prefix="/api")
-app.include_router(debug_router, prefix="/api")
-app.include_router(interview_router, prefix="/api")
-app.include_router(leaderboard_router, prefix="/api")
+app.include_router(planner_router, prefix="/api")
+app.include_router(resume_router, prefix="/api/resume")
 
 if __name__ == "__main__":
     port = int(os.getenv("AI_SERVICE_PORT", 8000))

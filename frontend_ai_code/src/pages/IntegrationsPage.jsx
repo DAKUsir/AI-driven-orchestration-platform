@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Code2, BookOpen, GitBranch, RefreshCw, CheckCircle, Plus, X, Trash2,
-  ExternalLink, Loader2, Star, GitFork, FolderKanban, AlertCircle, Zap
+  ExternalLink, Loader2, Star, GitFork, FolderKanban, AlertCircle, Zap,
+  PlayCircle, Unplug,
 } from 'lucide-react'
 import useIntegrationStore from '../store/useIntegrationStore'
+import useYoutubeStore from '../store/useYoutubeStore'
 import useAuthStore from '../store/useAuthStore'
 import api from '../utils/api'
 
@@ -52,9 +55,21 @@ export default function IntegrationsPage() {
   const [projectPlatform, setProjectPlatform] = useState('GitHub')
   const [addingProject, setAddingProject] = useState(false)
 
+  const yt = useYoutubeStore()
+
   useEffect(() => {
     fetchIntegrations()
     fetchProjects()
+    yt.fetchStatus()
+  }, [])
+
+  // Check for YouTube callback query params
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('youtube') === 'connected') {
+      yt.fetchStatus()
+      window.history.replaceState({}, '', '/integrations')
+    }
   }, [])
 
   // Pre-fill usernames from user data
@@ -155,6 +170,61 @@ export default function IntegrationsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ─── Section 0: YouTube Integration ──────────────────────────── */}
+      <section>
+        <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+          YouTube Integration
+        </h2>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden">
+          <div className="p-5 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center flex-shrink-0 text-xl">
+              🎬
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h3 className="text-base font-semibold text-zinc-100">YouTube</h3>
+                {yt.connected && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle className="w-3 h-3" /> Connected
+                  </span>
+                )}
+              </div>
+              {yt.connected ? (
+                <p className="text-xs text-zinc-500">
+                  {yt.channelTitle || 'YouTube Account'} · Track playlists as courses
+                </p>
+              ) : (
+                <p className="text-xs text-zinc-500">Connect to auto-track your YouTube playlists and courses</p>
+              )}
+            </div>
+
+            {yt.connected ? (
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Link to="/youtube" className="btn btn-primary btn-sm">
+                  <PlayCircle className="w-4 h-4" /> Dashboard
+                </Link>
+                <button onClick={() => yt.disconnectYoutube()} className="btn btn-ghost btn-sm text-zinc-500 hover:text-red-400">
+                  <Unplug className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => yt.connectYoutube()} className="btn btn-primary btn-sm flex-shrink-0" id="connect-youtube-btn">
+                <Plus className="w-4 h-4" /> Connect YouTube
+              </button>
+            )}
+          </div>
+
+          {yt.connected && (
+            <div className="border-t border-zinc-800/60 px-5 py-3 flex items-center gap-4 text-xs text-zinc-500">
+              <span>Last synced: {yt.lastSynced ? new Date(yt.lastSynced).toLocaleString() : 'Never'}</span>
+              <Link to="/youtube" className="text-indigo-400 hover:text-indigo-300 ml-auto flex items-center gap-1">
+                View courses <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+          )}
+        </motion.div>
+      </section>
 
       {/* ─── Section 1: Coding Platform Connections ─────────────────────── */}
       <section>

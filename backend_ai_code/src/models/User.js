@@ -46,10 +46,30 @@ const userSchema = mongoose.Schema(
       type: String,
       enum: ["beginner", "intermediate", "advanced"],
     },
+    // ── Task orchestration fields ──
+    studyGoal: {
+      type: String,
+      default: "",
+    },
+    availableHours: {
+      type: Number,
+      default: 2,
+    },
     dailyStudyHours: {
       type: Number,
       default: 0,
     },
+    preferredPlatforms: {
+      type: [String],
+      default: [],
+    },
+    savedLinks: [
+      {
+        url: String,
+        title: String,
+        platform: String,
+      },
+    ],
     year: {
       type: Number,
       enum: [1, 2, 3, 4],
@@ -57,6 +77,7 @@ const userSchema = mongoose.Schema(
     department: {
       type: String,
     },
+    // ── External platform usernames ──
     leetcodeUsername: {
       type: String,
     },
@@ -66,6 +87,7 @@ const userSchema = mongoose.Schema(
     githubUsername: {
       type: String,
     },
+    // ── Tracked stats ──
     skills: [String],
     weakTopics: [String],
     strongTopics: [String],
@@ -85,31 +107,16 @@ const userSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    currentRoadmap: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Roadmap",
-    },
     points: {
       type: Number,
       default: 0,
     },
-    aiTokensUsed: {
-      type: Number,
-      default: 0,
-    },
-    customAiApiKey: {
-      type: String,
-    },
-    aiRequestCount: {
-      type: Number,
-      default: 0,
-    },
-    aiRateLimitReset: {
-      type: Date,
-    },
-    isPremium: {
-      type: Boolean,
-      default: false,
+    // ── Notification preferences ──
+    notificationPreferences: {
+      dailyReminder: { type: Boolean, default: true },
+      weeklyReview: { type: Boolean, default: true },
+      contestAlerts: { type: Boolean, default: true },
+      streakReminder: { type: Boolean, default: true },
     },
     lastActive: {
       type: Date,

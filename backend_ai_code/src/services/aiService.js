@@ -22,83 +22,160 @@ const checkHealth = async () => {
 };
 
 /**
- * Generate a personalized roadmap using AI
+ * Break a large goal into smaller actionable tasks
  */
-const generateRoadmap = async (userData) => {
+const breakTask = async (goal, context = "") => {
   try {
-    const response = await aiClient.post("/api/generate-roadmap", userData);
+    const response = await aiClient.post("/api/break-task", { goal, context });
     return response.data;
   } catch (error) {
-    console.error("[AI Service] Roadmap generation error:", error.message);
-    throw {
-      message: "AI roadmap service temporarily unavailable",
-      fallback: true,
-    };
+    console.error("[AI Service] Break task error:", error.message);
+    throw { message: "AI task breakdown service temporarily unavailable", fallback: true };
   }
 };
 
 /**
- * Chat with the AI mentor
+ * Suggest optimal task order for today
  */
-const chatWithMentor = async (messages, contextType) => {
+const prioritizeDay = async (tasks, availableHours = 4) => {
   try {
-    const response = await aiClient.post("/api/chat", {
-      messages,
-      contextType,
+    const response = await aiClient.post("/api/prioritize-day", { tasks, availableHours });
+    return response.data;
+  } catch (error) {
+    console.error("[AI Service] Prioritize error:", error.message);
+    throw { message: "AI prioritization service temporarily unavailable", fallback: true };
+  }
+};
+
+/**
+ * Generate weekly review summary
+ */
+const getWeeklyReview = async (completed, skipped, carried) => {
+  try {
+    const response = await aiClient.post("/api/weekly-review", { completed, skipped, carried });
+    return response.data;
+  } catch (error) {
+    console.error("[AI Service] Weekly review error:", error.message);
+    throw { message: "AI review service temporarily unavailable", fallback: true };
+  }
+};
+
+/**
+ * Smart rescheduling of missed tasks
+ */
+const rescheduleTasks = async (tasks, availableHours = 4) => {
+  try {
+    const response = await aiClient.post("/api/reschedule", { tasks, availableHours });
+    return response.data;
+  } catch (error) {
+    console.error("[AI Service] Reschedule error:", error.message);
+    throw { message: "AI reschedule service temporarily unavailable", fallback: true };
+  }
+};
+
+// ── Resume Analyzer (Gradio proxy via FastAPI) ──────────────────────
+
+/**
+ * Process a resume file via Gradio space
+ */
+const processResume = async (filePath) => {
+  try {
+    const FormData = require("form-data");
+    const fs = require("fs");
+    const form = new FormData();
+    form.append("file", fs.createReadStream(filePath));
+
+    const response = await aiClient.post("/api/resume/process", form, {
+      headers: { ...form.getHeaders() },
+      timeout: 120000,
     });
     return response.data;
   } catch (error) {
-    console.error("[AI Service] Chat error:", error.message);
-    throw {
-      message: "AI mentor service temporarily unavailable",
-      fallback: true,
-    };
+    console.error("[AI Service] Process resume error:", error.message);
+    throw { message: "Resume processing service temporarily unavailable" };
   }
 };
 
 /**
- * AI-powered code debugging
+ * Analyze resume text with optional job description
  */
-const debugCode = async (code, language, error) => {
+const analyzeResume = async (resumeText, jobDescription = "", withJobDescription = true, temperature, maxTokens) => {
   try {
-    const response = await aiClient.post("/api/debug", {
-      code,
-      language,
-      error,
+    const response = await aiClient.post("/api/resume/analyze", {
+      resume_text: resumeText,
+      job_description: jobDescription,
+      with_job_description: withJobDescription,
+      temperature,
+      max_tokens: maxTokens,
     });
     return response.data;
-  } catch (err) {
-    console.error("[AI Service] Debug error:", err.message);
-    throw {
-      message: "AI debug service temporarily unavailable",
-      fallback: true,
-    };
+  } catch (error) {
+    console.error("[AI Service] Analyze resume error:", error.message);
+    throw { message: "Resume analysis service temporarily unavailable" };
   }
 };
 
 /**
- * Analyze resume for ATS score and suggestions
+ * Rephrase resume text
  */
-const analyzeResume = async (text, targetRole) => {
+const rephraseText = async (text, temperature, maxTokens) => {
   try {
-    const response = await aiClient.post("/api/analyze-resume", {
+    const response = await aiClient.post("/api/resume/rephrase", {
       text,
-      targetRole,
+      temperature,
+      max_tokens: maxTokens,
     });
     return response.data;
   } catch (error) {
-    console.error("[AI Service] Resume analysis error:", error.message);
-    throw {
-      message: "AI resume analyzer temporarily unavailable",
-      fallback: true,
-    };
+    console.error("[AI Service] Rephrase error:", error.message);
+    throw { message: "Rephrase service temporarily unavailable" };
+  }
+};
+
+/**
+ * Generate cover letter
+ */
+const generateCoverLetter = async (resumeText, jobDescription, temperature, maxTokens) => {
+  try {
+    const response = await aiClient.post("/api/resume/cover-letter", {
+      resume_text: resumeText,
+      job_description: jobDescription,
+      temperature,
+      max_tokens: maxTokens,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("[AI Service] Cover letter error:", error.message);
+    throw { message: "Cover letter service temporarily unavailable" };
+  }
+};
+
+/**
+ * Generate interview questions
+ */
+const generateInterviewQuestions = async (jobDescription, temperature, maxTokens) => {
+  try {
+    const response = await aiClient.post("/api/resume/interview-questions", {
+      job_description: jobDescription,
+      temperature,
+      max_tokens: maxTokens,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("[AI Service] Interview questions error:", error.message);
+    throw { message: "Interview questions service temporarily unavailable" };
   }
 };
 
 module.exports = {
   checkHealth,
-  generateRoadmap,
-  chatWithMentor,
-  debugCode,
+  breakTask,
+  prioritizeDay,
+  getWeeklyReview,
+  rescheduleTasks,
+  processResume,
   analyzeResume,
+  rephraseText,
+  generateCoverLetter,
+  generateInterviewQuestions,
 };

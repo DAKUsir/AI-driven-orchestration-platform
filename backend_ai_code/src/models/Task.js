@@ -7,71 +7,97 @@ const taskSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
-    roadmapId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Roadmap",
-    },
-    kanbanStatus: {
-      type: String,
-      enum: ["backlog", "todo", "in-progress", "done"],
-      default: "backlog",
-    },
     title: {
       type: String,
       required: true,
+      trim: true,
     },
     description: {
       type: String,
+      default: "",
     },
-    platform: {
+    sourceLink: {
       type: String,
+      default: "",
     },
-    platformLink: {
+    category: {
       type: String,
+      enum: [
+        "youtube",
+        "coursera",
+        "github",
+        "leetcode",
+        "gfg",
+        "kaggle",
+        "interview-prep",
+        "other",
+      ],
+      default: "other",
+    },
+    status: {
+      type: String,
+      enum: ["pending", "in-progress", "done", "skipped"],
+      default: "pending",
+    },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "urgent"],
+      default: "medium",
     },
     difficulty: {
       type: String,
       enum: ["easy", "medium", "hard"],
+      default: "medium",
     },
-    estimatedMinutes: {
-      type: Number,
-    },
-    taskType: {
-      type: String,
-      enum: [
-        "problem-solving",
-        "video",
-        "article",
-        "quiz",
-        "project",
-        "mock-interview",
-        "resume",
-        "behavioral",
-        "system-design",
-      ],
-    },
-    tags: [String],
     dueDate: {
       type: Date,
     },
-    completed: {
+    estimatedMinutes: {
+      type: Number,
+      default: 30,
+    },
+    actualMinutes: {
+      type: Number,
+    },
+    tags: [String],
+    isCarryForward: {
       type: Boolean,
       default: false,
+    },
+    originalDueDate: {
+      type: Date,
+    },
+    calendarSlot: {
+      date: { type: Date },
+      startTime: { type: String },
+      endTime: { type: String },
     },
     completedAt: {
       type: Date,
     },
-    aiGenerated: {
-      type: Boolean,
-      default: true,
-    },
     notes: {
       type: String,
+      default: "",
     },
+    parentTask: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Task",
+    },
+    subtasks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
+
+// Indexes for common queries
+taskSchema.index({ userId: 1, status: 1 });
+taskSchema.index({ userId: 1, dueDate: 1 });
+taskSchema.index({ userId: 1, category: 1 });
 
 module.exports = mongoose.model("Task", taskSchema);
