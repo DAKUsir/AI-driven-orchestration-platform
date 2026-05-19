@@ -62,6 +62,8 @@ const useGroupChatStore = create((set, get) => ({
     }
   },
 
+  getSocket: () => socket,
+
   fetchGroups: async () => {
     set({ loading: true })
     try {

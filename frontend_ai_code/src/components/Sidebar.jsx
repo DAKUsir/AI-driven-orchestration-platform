@@ -4,7 +4,7 @@ import {
   LayoutDashboard, CheckSquare, Calendar, Swords, BookOpen,
   Trophy, Settings, Puzzle, MessageSquare, LogOut, X,
   ChevronLeft, ChevronRight, Target, GraduationCap, Briefcase, Code2,
-  PlayCircle,
+  PlayCircle, BarChart3,
 } from 'lucide-react'
 import useAuthStore from '../store/useAuthStore'
 
@@ -13,6 +13,7 @@ const navGroups = [
     label: 'Overview',
     items: [
       { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/analytics', icon: BarChart3, label: 'Analytics' },
       { to: '/planner', icon: CheckSquare, label: 'Task Planner' },
       { to: '/calendar', icon: Calendar, label: 'Calendar' },
     ],

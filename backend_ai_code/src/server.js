@@ -104,6 +104,7 @@ app.get("/", (req, res) => {
 
 // ── Socket.IO Authentication & Events ────────────────────────────────
 const onlineUsers = new Map();
+const voiceRooms = new Map(); // groupId -> Set(socket.id)
 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
@@ -211,8 +212,80 @@ io.on("connection", async (socket) => {
     }
   });
 
+  // ── WebRTC Voice Channel Events ──
+  socket.on("join-voice", (groupId) => {
+    if (!voiceRooms.has(groupId)) {
+      voiceRooms.set(groupId, new Set());
+    }
+    const room = voiceRooms.get(groupId);
+    room.add(socket.id);
+
+    const userInfo = onlineUsers.get(socket.id);
+    // Tell others in the voice room that this user joined
+    for (let peerSocketId of room) {
+      if (peerSocketId !== socket.id) {
+        io.to(peerSocketId).emit("user-joined-voice", {
+          socketId: socket.id,
+          userId: userInfo?.userId,
+          userName: userInfo?.userName
+        });
+      }
+    }
+    
+    // Tell the joining user who is already in the room
+    const currentMembers = Array.from(room).filter(id => id !== socket.id).map(id => {
+      const uInfo = onlineUsers.get(id);
+      return { socketId: id, userId: uInfo?.userId, userName: uInfo?.userName };
+    });
+    socket.emit("voice-room-users", currentMembers);
+  });
+
+  socket.on("webrtc-offer", ({ targetSocketId, offer }) => {
+    const userInfo = onlineUsers.get(socket.id);
+    io.to(targetSocketId).emit("webrtc-offer", {
+      fromSocketId: socket.id,
+      fromUserId: userInfo?.userId,
+      fromUserName: userInfo?.userName,
+      offer
+    });
+  });
+
+  socket.on("webrtc-answer", ({ targetSocketId, answer }) => {
+    io.to(targetSocketId).emit("webrtc-answer", {
+      fromSocketId: socket.id,
+      answer
+    });
+  });
+
+  socket.on("webrtc-ice-candidate", ({ targetSocketId, candidate }) => {
+    io.to(targetSocketId).emit("webrtc-ice-candidate", {
+      fromSocketId: socket.id,
+      candidate
+    });
+  });
+
+  socket.on("leave-voice", (groupId) => {
+    if (voiceRooms.has(groupId)) {
+      const room = voiceRooms.get(groupId);
+      room.delete(socket.id);
+      for (let peerSocketId of room) {
+        io.to(peerSocketId).emit("user-left-voice", { socketId: socket.id });
+      }
+    }
+  });
+
   // Disconnect
   socket.on("disconnect", () => {
+    // Remove from voice rooms
+    voiceRooms.forEach((room, groupId) => {
+      if (room.has(socket.id)) {
+        room.delete(socket.id);
+        for (let peerSocketId of room) {
+          io.to(peerSocketId).emit("user-left-voice", { socketId: socket.id });
+        }
+      }
+    });
+
     onlineUsers.delete(socket.id);
     console.log(`[Socket] User disconnected: ${userId}`);
   });

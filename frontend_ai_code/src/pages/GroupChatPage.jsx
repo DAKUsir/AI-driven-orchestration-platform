@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import useGroupChatStore from '../store/useGroupChatStore'
 import useAuthStore from '../store/useAuthStore'
+import VoiceChannel from '../components/VoiceChannel'
 
 function formatTime(ts) {
   const d = new Date(ts)
@@ -422,6 +423,9 @@ export default function GroupChatPage() {
                 )}
               </AnimatePresence>
             </div>
+
+            {/* Voice Channel */}
+            <VoiceChannel groupId={activeGroup._id} />
 
             {/* Input */}
             <form onSubmit={handleSend} className="border-t border-zinc-800/60 p-3">

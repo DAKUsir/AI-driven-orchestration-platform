@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const GITHUB_MODELS_URL = "https://models.github.ai/inference/chat/completions";
+const GITHUB_MODELS_URL = "https://models.inference.ai.azure.com/chat/completions";
 const MODEL = "openai/gpt-4o";
 
 // @desc    Chat with AI (code editor assistant)

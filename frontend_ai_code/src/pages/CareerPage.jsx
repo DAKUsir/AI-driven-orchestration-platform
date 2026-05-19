@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { Briefcase, Upload, FileText, Target, CheckCircle, Loader2, Sparkles, AlertCircle, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Briefcase, Upload, FileText, Target, CheckCircle, Loader2, Sparkles, AlertCircle, X, TerminalSquare, Copy, Check } from 'lucide-react'
 import useCareerStore from '../store/useCareerStore'
 
 export default function CareerPage() {
@@ -9,6 +9,114 @@ export default function CareerPage() {
   const { analysis, uploading, error, uploadResume, clearAnalysis } = useCareerStore()
   const fileRef = useRef(null)
   const [dragOver, setDragOver] = useState(false)
+  
+  // API Docs state
+  const [showApiDocs, setShowApiDocs] = useState(false)
+  const [copiedKey, setCopiedKey] = useState(null)
+
+  const copyToClipboard = (text, key) => {
+    navigator.clipboard.writeText(text)
+    setCopiedKey(key)
+    setTimeout(() => setCopiedKey(null), 2000)
+  }
+
+  const apiEndpoints = [
+    {
+      name: '/process_resume',
+      description: 'Upload Resume (PDF or DOCX)',
+      params: 'file: filepath (Required)',
+      returns: 'str (Parsed Resume Content)',
+      code: `from gradio_client import Client, handle_file
+
+client = Client("girishwangikar/ResumeATS")
+result = client.predict(
+\t\tfile=handle_file('path/to/resume.pdf'),
+\t\tapi_name="/process_resume"
+)
+print(result)`
+    },
+    {
+      name: '/analyze_resume',
+      description: 'Analyze resume against job description',
+      params: 'resume_text: str (Req), job_description: str (Req), with_job_description: bool (Default: True), temperature: float (0.5), max_tokens: float (1024)',
+      returns: 'str (Analysis Markdown)',
+      code: `from gradio_client import Client
+
+client = Client("girishwangikar/ResumeATS")
+result = client.predict(
+\t\tresume_text="Parsed content...",
+\t\tjob_description="Job desc...",
+\t\twith_job_description=True,
+\t\ttemperature=0.5,
+\t\tmax_tokens=1024,
+\t\tapi_name="/analyze_resume"
+)
+print(result)`
+    },
+    {
+      name: '/rephrase_text',
+      description: 'Rephrase resume text for impact',
+      params: 'text: str (Req), temperature: float (0.5), max_tokens: float (1024)',
+      returns: 'str (Rephrased Text)',
+      code: `from gradio_client import Client
+
+client = Client("girishwangikar/ResumeATS")
+result = client.predict(
+\t\ttext="Text to rephrase...",
+\t\ttemperature=0.5,
+\t\tmax_tokens=1024,
+\t\tapi_name="/rephrase_text"
+)
+print(result)`
+    },
+    {
+      name: '/generate_cover_letter',
+      description: 'Generate tailored cover letter',
+      params: 'resume_text: str (Req), job_description: str (Req), temperature: float (0.5), max_tokens: float (1024)',
+      returns: 'str (Cover Letter)',
+      code: `from gradio_client import Client
+
+client = Client("girishwangikar/ResumeATS")
+result = client.predict(
+\t\tresume_text="Parsed content...",
+\t\tjob_description="Job desc...",
+\t\ttemperature=0.5,
+\t\tmax_tokens=1024,
+\t\tapi_name="/generate_cover_letter"
+)
+print(result)`
+    },
+    {
+      name: '/generate_interview_questions',
+      description: 'Generate role-specific interview questions',
+      params: 'job_description: str (Req), temperature: float (0.5), max_tokens: float (1024)',
+      returns: 'str (Interview Questions)',
+      code: `from gradio_client import Client
+
+client = Client("girishwangikar/ResumeATS")
+result = client.predict(
+\t\tjob_description="Job desc...",
+\t\ttemperature=0.5,
+\t\tmax_tokens=1024,
+\t\tapi_name="/generate_interview_questions"
+)
+print(result)`
+    },
+    {
+      name: '/update_job_description_visibility',
+      description: 'Toggle job description requirement',
+      params: 'with_job_description: bool (Default: True)',
+      returns: 'str (Job Description)',
+      code: `from gradio_client import Client
+
+client = Client("girishwangikar/ResumeATS")
+result = client.predict(
+\t\twith_job_description=True,
+\t\tapi_name="/update_job_description_visibility"
+)
+print(result)`
+    }
+  ]
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -24,10 +132,19 @@ export default function CareerPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Career Accelerator</h1>
-        <p className="text-sm text-zinc-500 mt-1">Upload your resume and get AI-powered insights</p>
+    <div className="space-y-6 max-w-3xl relative">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Career Accelerator</h1>
+          <p className="text-sm text-zinc-500 mt-1">Upload your resume and get AI-powered insights</p>
+        </div>
+        <button
+          onClick={() => setShowApiDocs(true)}
+          className="btn btn-secondary btn-sm"
+        >
+          <TerminalSquare className="w-4 h-4" />
+          API Docs
+        </button>
       </div>
 
       {!analysis ? (
@@ -188,6 +305,85 @@ export default function CareerPage() {
           </div>
         </motion.div>
       )}
+
+      {/* ── API Documentation Modal ── */}
+      <AnimatePresence>
+        {showApiDocs && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowApiDocs(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="card w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden bg-[#18181b]"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-100">API Documentation</h3>
+                  <p className="text-xs text-zinc-500">Gradio Client Snippets for girishwangikar/ResumeATS</p>
+                </div>
+                <button
+                  onClick={() => setShowApiDocs(false)}
+                  className="btn btn-ghost btn-sm btn-icon"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                <div className="bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-xl">
+                  <p className="text-sm text-indigo-300">
+                    <strong>1. Install the python client:</strong> <code>pip install gradio_client</code>
+                  </p>
+                </div>
+
+                {apiEndpoints.map((endpoint, i) => (
+                  <div key={i} className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-emerald-400 font-mono">
+                        {endpoint.name}
+                      </h4>
+                      <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">{endpoint.description}</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      <div className="bg-zinc-900/50 p-2.5 rounded-lg border border-zinc-800">
+                        <span className="text-zinc-500 block mb-1">Parameters:</span>
+                        <code className="text-amber-300/80">{endpoint.params}</code>
+                      </div>
+                      <div className="bg-zinc-900/50 p-2.5 rounded-lg border border-zinc-800">
+                        <span className="text-zinc-500 block mb-1">Returns:</span>
+                        <code className="text-cyan-300/80">{endpoint.returns}</code>
+                      </div>
+                    </div>
+
+                    <div className="relative group">
+                      <div className="absolute right-2 top-2">
+                        <button
+                          onClick={() => copyToClipboard(endpoint.code, i)}
+                          className="btn btn-ghost btn-sm btn-icon text-zinc-500 hover:text-zinc-300"
+                        >
+                          {copiedKey === i ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      <pre className="text-xs font-mono bg-black/40 p-4 rounded-xl border border-zinc-800 overflow-x-auto text-zinc-300">
+                        {endpoint.code}
+                      </pre>
+                    </div>
+                    {i < apiEndpoints.length - 1 && <hr className="border-zinc-800/60 my-6" />}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

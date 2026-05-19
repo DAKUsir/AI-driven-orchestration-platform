@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage'
 import AuthPage from './pages/AuthPage'
 import OnboardingPage from './pages/OnboardingPage'
 import Dashboard from './pages/Dashboard'
+import AnalyticsPage from './pages/AnalyticsPage'
 import TaskPlannerPage from './pages/TaskPlannerPage'
 import CalendarPage from './pages/CalendarPage'
 import CompetitionsPage from './pages/CompetitionsPage'
@@ -33,6 +34,7 @@ export default function App() {
       >
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/planner" element={<TaskPlannerPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/competitions" element={<CompetitionsPage />} />

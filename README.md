@@ -19,8 +19,10 @@ An AI-powered full-stack platform that unifies coding interview preparation into
 | 😊 **Emotion Detection** | Real-time confidence tracking via webcam during mock interviews (client-side) |
 | 📊 **Rich Analytics** | Skills radar, weekly activity, progress charts, and topic mastery breakdowns |
 | 🏆 **Leaderboard** | Compete with other users — earn points by completing tasks |
-| 📄 **Resume Analyzer** | AI-powered resume analysis with match scoring and skill gap identification |
+| 📄 **Resume Analyzer** | AI-powered resume analysis with match scoring, cover letter generation, and interview prep. Includes fully documented Gradio API integration. |
 | 🔐 **Secure Auth** | Email/password (bcrypt) + Google OAuth, JWT-secured sessions |
+| 🎧 **Group Voice Calls**| Join community groups and hop into real-time WebRTC voice channels, similar to Discord |
+| 📺 **YouTube Tracking**| Connect playlists via URL or OAuth and seamlessly integrate them into your learning roadmap |
 
 ---
 
@@ -140,7 +142,21 @@ The app will be available at `http://localhost:5173`
 
 ---
 
-## 🔌 API Endpoints
+## 🔌 API & Integrations
+
+### ResumeATS Gradio Endpoints
+The AI Resume Analyzer connects directly to the `girishwangikar/ResumeATS` Gradio space. The following Python client endpoints are supported:
+
+| Endpoint | Description | Key Parameters |
+|---|---|---|
+| `/process_resume` | Extract text from PDF/DOCX | `file` (filepath) |
+| `/analyze_resume` | ATS score and feedback | `resume_text`, `job_description` |
+| `/rephrase_text` | Rephrase text blocks | `text`, `temperature` |
+| `/generate_cover_letter` | Create a tailored cover letter | `resume_text`, `job_description` |
+| `/generate_interview_questions`| Prepare for an interview | `job_description` |
+| `/update_job_description_visibility` | Toggle requirements | `with_job_description` |
+
+### Internal Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
