@@ -2,7 +2,6 @@ const Resume = require("../models/Resume");
 const axios = require("axios");
 const fs = require("fs");
 const FormData = require("form-data");
-const path = require("path");
 
 // Gradio space base URL
 const GRADIO_SPACE = "https://girishwangikar-resumeats.hf.space";
@@ -46,28 +45,64 @@ const callGradio = async (apiName, requestData) => {
   // Step 2: GET /call/<api_name>/<event_id> to get results (SSE stream)
   const getRes = await axios.get(
     `${GRADIO_SPACE}/call${apiName}/${eventId}`,
-    { timeout: GRADIO_TIMEOUT, responseType: "text" }
+    { timeout: GRADIO_TIMEOUT, responseType: "stream" }
   );
 
-  // Parse SSE response — look for the last "data:" line
-  const lines = getRes.data.split("\n");
-  let resultData = null;
-  for (let i = lines.length - 1; i >= 0; i--) {
-    if (lines[i].startsWith("data:")) {
-      try {
-        resultData = JSON.parse(lines[i].slice(5).trim());
-        break;
-      } catch {
-        // Not valid JSON, keep looking
+  return new Promise((resolve, reject) => {
+    let resultData = null;
+    let buffer = "";
+
+    getRes.data.on("data", (chunk) => {
+      buffer += chunk.toString("utf8");
+
+      // Check if we reached the complete event
+      if (buffer.includes("event: complete")) {
+        const parts = buffer.split("event: complete");
+        const afterComplete = parts[1];
+        if (afterComplete && afterComplete.includes("data:")) {
+          const jsonStrLine = afterComplete.split("\n").find((line) => line.trim().startsWith("data:"));
+          if (jsonStrLine) {
+            try {
+              // Extract the JSON part after 'data:'
+              const jsonContent = jsonStrLine.trim().substring(5).trim();
+              resultData = JSON.parse(jsonContent);
+              resolve(resultData);
+            } catch (e) {
+              console.error("[Gradio] Failed to parse complete event data", e);
+            }
+          }
+        }
       }
-    }
-  }
 
-  if (!resultData) {
-    throw new Error("Failed to parse Gradio response");
-  }
+      // Handle errors
+      if (buffer.includes("event: error")) {
+        reject(new Error("Gradio returned an error event"));
+      }
+    });
 
-  return resultData;
+    getRes.data.on("end", () => {
+      if (!resultData) {
+        // Fallback: search the entire buffer for the last valid data payload
+        const lines = buffer.split("\n");
+        for (let i = lines.length - 1; i >= 0; i--) {
+          const line = lines[i].trim();
+          if (line.startsWith("data:")) {
+            try {
+              const jsonContent = line.substring(5).trim();
+              resultData = JSON.parse(jsonContent);
+              resolve(resultData);
+              return;
+            } catch (e) {
+              // keep looking
+            }
+          }
+        }
+        reject(new Error("Stream ended without completion payload"));
+      }
+    });
+
+    getRes.data.on("error", (err) => reject(err));
+  });
 };
 
 // ── Controllers ─────────────────────────────────────────────────────────────
@@ -87,8 +122,14 @@ const uploadResume = async (req, res) => {
     const gradioFile = await uploadFileToGradio(filePath);
 
     // Step 2: Call /process_resume to parse it
-    const result = await callGradio("/process_resume", [gradioFile]);
-    const parsedText = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    // Gradio 4+ requires file inputs to be structured as FileData objects
+    const fileData = {
+      path: gradioFile,
+      meta: { _type: "gradio.FileData" }
+    };
+    
+    const result = await callGradio("/process_resume", [fileData]);
+    const parsedText = Array.isArray(result) ? result[0] : result?.data?.[0] || "";
 
     // Save to DB
     const resume = await Resume.create({
@@ -136,7 +177,7 @@ const analyzeResumeText = async (req, res) => {
       maxTokens,
     ]);
 
-    const analysis = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    const analysis = Array.isArray(result) ? result[0] : result?.data?.[0] || "";
     res.json({ analysis });
   } catch (error) {
     console.error("[Resume] Analyze error:", error.message);
@@ -163,7 +204,7 @@ const rephraseText = async (req, res) => {
       maxTokens,
     ]);
 
-    const rephrased = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    const rephrased = Array.isArray(result) ? result[0] : result?.data?.[0] || "";
     res.json({ rephrased });
   } catch (error) {
     console.error("[Resume] Rephrase error:", error.message);
@@ -198,7 +239,7 @@ const generateCoverLetter = async (req, res) => {
       maxTokens,
     ]);
 
-    const coverLetter = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    const coverLetter = Array.isArray(result) ? result[0] : result?.data?.[0] || "";
     res.json({ coverLetter });
   } catch (error) {
     console.error("[Resume] Cover letter error:", error.message);
@@ -216,9 +257,7 @@ const generateInterviewQuestions = async (req, res) => {
     const { jobDescription, temperature = 0.5, maxTokens = 1024 } = req.body;
 
     if (!jobDescription) {
-      return res
-        .status(400)
-        .json({ message: "Job description is required" });
+      return res.status(400).json({ message: "Job description is required" });
     }
 
     const result = await callGradio("/generate_interview_questions", [
@@ -227,7 +266,7 @@ const generateInterviewQuestions = async (req, res) => {
       maxTokens,
     ]);
 
-    const questions = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    const questions = Array.isArray(result) ? result[0] : result?.data?.[0] || "";
     res.json({ questions });
   } catch (error) {
     console.error("[Resume] Interview questions error:", error.message);
