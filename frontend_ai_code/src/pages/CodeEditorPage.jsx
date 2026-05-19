@@ -300,7 +300,7 @@ export default function CodeEditorPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-zinc-100">AI Assistant</h3>
-                      <p className="text-[10px] text-zinc-600">Powered by GPT-4o</p>
+                      <p className="text-[10px] text-zinc-600">Powered by GPT-5</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">

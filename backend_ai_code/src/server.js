@@ -31,6 +31,7 @@ const resumeRoutes = require("./routes/resumeRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const youtubeRoutes = require("./routes/youtubeRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const GroupChat = require("./models/GroupChat");
 const User = require("./models/User");
@@ -96,6 +97,7 @@ app.use("/api/groups", groupChatRoutes);
 app.use("/api/resume", resumeRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/integrations/youtube", youtubeRoutes);
 
 app.get("/", (req, res) => {

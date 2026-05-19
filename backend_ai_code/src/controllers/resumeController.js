@@ -1,7 +1,78 @@
 const Resume = require("../models/Resume");
-const aiService = require("../services/aiService");
+const axios = require("axios");
+const fs = require("fs");
+const FormData = require("form-data");
+const path = require("path");
 
-// @desc    Upload and analyze resume
+// Gradio space base URL
+const GRADIO_SPACE = "https://girishwangikar-resumeats.hf.space";
+const GRADIO_TIMEOUT = 120000; // 2 minutes
+
+// ── Helper: Upload file to Gradio ──────────────────────────────────────────
+
+const uploadFileToGradio = async (filePath) => {
+  const form = new FormData();
+  form.append("files", fs.createReadStream(filePath));
+
+  const { data } = await axios.post(`${GRADIO_SPACE}/upload`, form, {
+    headers: { ...form.getHeaders() },
+    timeout: GRADIO_TIMEOUT,
+  });
+
+  if (!data || data.length === 0) {
+    throw new Error("File upload to Gradio failed");
+  }
+  return data[0]; // Returns file handle object
+};
+
+// ── Helper: Call Gradio via /call/<api_name> two-step pattern ───────────────
+
+const callGradio = async (apiName, requestData) => {
+  // Step 1: POST to /call/<api_name> to get event_id
+  const postRes = await axios.post(
+    `${GRADIO_SPACE}/call${apiName}`,
+    { data: requestData },
+    {
+      headers: { "Content-Type": "application/json" },
+      timeout: GRADIO_TIMEOUT,
+    }
+  );
+
+  const eventId = postRes.data?.event_id;
+  if (!eventId) {
+    throw new Error("Gradio did not return an event_id");
+  }
+
+  // Step 2: GET /call/<api_name>/<event_id> to get results (SSE stream)
+  const getRes = await axios.get(
+    `${GRADIO_SPACE}/call${apiName}/${eventId}`,
+    { timeout: GRADIO_TIMEOUT, responseType: "text" }
+  );
+
+  // Parse SSE response — look for the last "data:" line
+  const lines = getRes.data.split("\n");
+  let resultData = null;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (lines[i].startsWith("data:")) {
+      try {
+        resultData = JSON.parse(lines[i].slice(5).trim());
+        break;
+      } catch {
+        // Not valid JSON, keep looking
+      }
+    }
+  }
+
+  if (!resultData) {
+    throw new Error("Failed to parse Gradio response");
+  }
+
+  return resultData;
+};
+
+// ── Controllers ─────────────────────────────────────────────────────────────
+
+// @desc    Upload and parse resume via Gradio /process_resume
 // @route   POST /api/resume/upload
 // @access  Private
 const uploadResume = async (req, res) => {
@@ -10,56 +81,68 @@ const uploadResume = async (req, res) => {
       return res.status(400).json({ message: "Please upload a file" });
     }
 
-    const userId = req.user.id;
     const filePath = req.file.path;
 
-    // Step 1: Parse the resume via Gradio space
-    const parsed = await aiService.processResume(filePath);
-    const extractedText = parsed.parsedText || "";
+    // Step 1: Upload file to Gradio space
+    const gradioFile = await uploadFileToGradio(filePath);
 
-    // Step 2: Analyse the parsed resume
-    const analysis = await aiService.analyzeResume(
-      extractedText,
-      req.body.jobDescription || "",
-      !!req.body.jobDescription,
-    );
+    // Step 2: Call /process_resume to parse it
+    const result = await callGradio("/process_resume", [gradioFile]);
+    const parsedText = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
 
+    // Save to DB
     const resume = await Resume.create({
-      userId,
+      userId: req.user.id,
       originalFile: filePath,
-      extractedText,
-      analysisMarkdown: analysis.analysis || "",
-      targetRole: req.body.targetRole || "Software Engineer",
+      extractedText: parsedText,
+      targetRole: req.body.targetRole || "",
     });
 
-    res.status(201).json(resume);
+    res.status(201).json({
+      parsedText,
+      resumeId: resume._id,
+      filename: req.file.originalname,
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("[Resume] Upload/Parse error:", error.message);
+    res.status(500).json({
+      message: error.message || "Failed to process resume",
+    });
   }
 };
 
-// @desc    Analyze resume text directly (no file upload)
+// @desc    Analyze resume text with optional job description
 // @route   POST /api/resume/analyze
 // @access  Private
 const analyzeResumeText = async (req, res) => {
   try {
-    const { resumeText, jobDescription, withJobDescription, temperature, maxTokens } = req.body;
+    const {
+      resumeText,
+      jobDescription = "",
+      withJobDescription = true,
+      temperature = 0.5,
+      maxTokens = 1024,
+    } = req.body;
 
     if (!resumeText) {
       return res.status(400).json({ message: "Resume text is required" });
     }
 
-    const result = await aiService.analyzeResume(
+    const result = await callGradio("/analyze_resume", [
       resumeText,
-      jobDescription || "",
-      withJobDescription !== undefined ? withJobDescription : true,
+      jobDescription,
+      withJobDescription,
       temperature,
       maxTokens,
-    );
+    ]);
 
-    res.json(result);
+    const analysis = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    res.json({ analysis });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("[Resume] Analyze error:", error.message);
+    res.status(500).json({
+      message: "Resume analysis failed. The AI service may be busy — try again.",
+    });
   }
 };
 
@@ -68,16 +151,25 @@ const analyzeResumeText = async (req, res) => {
 // @access  Private
 const rephraseText = async (req, res) => {
   try {
-    const { text, temperature, maxTokens } = req.body;
+    const { text, temperature = 0.5, maxTokens = 1024 } = req.body;
 
     if (!text) {
       return res.status(400).json({ message: "Text is required" });
     }
 
-    const result = await aiService.rephraseText(text, temperature, maxTokens);
-    res.json(result);
+    const result = await callGradio("/rephrase_text", [
+      text,
+      temperature,
+      maxTokens,
+    ]);
+
+    const rephrased = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    res.json({ rephrased });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("[Resume] Rephrase error:", error.message);
+    res.status(500).json({
+      message: "Rephrase failed. The AI service may be busy — try again.",
+    });
   }
 };
 
@@ -86,21 +178,33 @@ const rephraseText = async (req, res) => {
 // @access  Private
 const generateCoverLetter = async (req, res) => {
   try {
-    const { resumeText, jobDescription, temperature, maxTokens } = req.body;
+    const {
+      resumeText,
+      jobDescription,
+      temperature = 0.5,
+      maxTokens = 1024,
+    } = req.body;
 
     if (!resumeText || !jobDescription) {
-      return res.status(400).json({ message: "Resume text and job description are required" });
+      return res
+        .status(400)
+        .json({ message: "Resume text and job description are required" });
     }
 
-    const result = await aiService.generateCoverLetter(
+    const result = await callGradio("/generate_cover_letter", [
       resumeText,
       jobDescription,
       temperature,
       maxTokens,
-    );
-    res.json(result);
+    ]);
+
+    const coverLetter = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    res.json({ coverLetter });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("[Resume] Cover letter error:", error.message);
+    res.status(500).json({
+      message: "Cover letter generation failed. Try again.",
+    });
   }
 };
 
@@ -109,20 +213,27 @@ const generateCoverLetter = async (req, res) => {
 // @access  Private
 const generateInterviewQuestions = async (req, res) => {
   try {
-    const { jobDescription, temperature, maxTokens } = req.body;
+    const { jobDescription, temperature = 0.5, maxTokens = 1024 } = req.body;
 
     if (!jobDescription) {
-      return res.status(400).json({ message: "Job description is required" });
+      return res
+        .status(400)
+        .json({ message: "Job description is required" });
     }
 
-    const result = await aiService.generateInterviewQuestions(
+    const result = await callGradio("/generate_interview_questions", [
       jobDescription,
       temperature,
       maxTokens,
-    );
-    res.json(result);
+    ]);
+
+    const questions = Array.isArray(result) ? result[0] : (result?.data?.[0] || "");
+    res.json({ questions });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("[Resume] Interview questions error:", error.message);
+    res.status(500).json({
+      message: "Interview questions generation failed. Try again.",
+    });
   }
 };
 
@@ -131,7 +242,9 @@ const generateInterviewQuestions = async (req, res) => {
 // @access  Private
 const getResumeHistory = async (req, res) => {
   try {
-    const resumes = await Resume.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const resumes = await Resume.find({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
     res.json(resumes);
   } catch (error) {
     res.status(500).json({ message: error.message });
