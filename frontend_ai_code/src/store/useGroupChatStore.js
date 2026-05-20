@@ -22,7 +22,7 @@ const useGroupChatStore = create((set, get) => ({
     if (!token) return
 
     // Connect to Socket.IO
-    socket = io('http://localhost:5000', {
+    socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
       auth: { token },
       transports: ['websocket', 'polling'],
     })
