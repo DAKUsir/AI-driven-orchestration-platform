@@ -56,9 +56,14 @@ const useAuthStore = create((set, get) => ({
       const { data } = await api.get('/auth/me')
       const onboardingCompleted = data.onboardingCompleted ?? true
       set({ user: { ...data, onboardingCompleted }, loading: false })
-    } catch {
-      localStorage.removeItem('token')
-      set({ user: null, token: null, loading: false })
+    } catch (err) {
+      // Only clear token on 401 (invalid/expired) — not on network errors
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token')
+        set({ user: null, token: null, loading: false })
+      } else {
+        set({ loading: false })
+      }
     }
   },
 

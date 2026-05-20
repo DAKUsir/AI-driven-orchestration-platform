@@ -21,12 +21,11 @@ export default function AuthPage() {
     if (tokenParam) {
       setToken(tokenParam)
       loadUser().then(() => navigate('/dashboard'))
+    } else if (token) {
+      // Already logged in — go straight to dashboard
+      navigate('/dashboard')
     }
   }, [])
-
-  useEffect(() => {
-    if (token) navigate('/dashboard')
-  }, [token])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
