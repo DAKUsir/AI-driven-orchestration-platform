@@ -32,11 +32,7 @@ const useGroupChatStore = create((set, get) => ({
     })
 
     socket.on('receive-message', (message) => {
-      set((state) => {
-        // Avoid duplicates — sender already added via REST
-        if (state.messages.some(m => m._id?.toString() === message._id?.toString())) return state
-        return { messages: [...state.messages, message] }
-      })
+      set((state) => ({ messages: [...state.messages, message] }))
     })
 
     socket.on('online-users', (users) => {
@@ -158,10 +154,9 @@ const useGroupChatStore = create((set, get) => ({
     if (!activeGroup) return
 
     try {
-      // Save via REST — the server controller broadcasts to other members via socket
-      const { data } = await api.post(`/groups/${activeGroup._id}/messages`, { content })
-      // Show immediately for the sender (others get it via server socket broadcast)
-      set((state) => ({ messages: [...state.messages, data] }))
+      // Save via REST only — server broadcasts 'receive-message' to everyone
+      // including the sender, so we do NOT push to state here.
+      await api.post(`/groups/${activeGroup._id}/messages`, { content })
     } catch (err) {
       console.error('Failed to send message:', err)
     }
