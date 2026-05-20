@@ -1,4 +1,4 @@
-# 🚀 FinishIt — AI-Powered Competitive Learning Platform
+# 🚀 FinishIt — AI-Powered Competitive Orchestrated Learning Platform
 
 > *Stop starting. Start finishing.*
 
