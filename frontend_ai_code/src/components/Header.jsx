@@ -1,23 +1,40 @@
 import { useState, useEffect, useRef } from 'react'
-import { Menu, Bell, Search, Command } from 'lucide-react'
+import { Menu, Bell, Sun, Moon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAuthStore from '../store/useAuthStore'
 import useNotificationStore from '../store/useNotificationStore'
 import { useNavigate, useLocation } from 'react-router-dom'
 
 const pageTitles = {
-  '/dashboard': 'Dashboard',
-  '/roadmap': 'Roadmap',
-  '/kanban': 'Kanban Board',
-  '/mentor': 'AI Mentor',
-  '/interview': 'Mock Interview',
-  '/editor': 'Code Editor',
-  '/analytics': 'Analytics',
-  '/leaderboard': 'Leaderboard',
-  '/career': 'Career',
+  '/dashboard':    'Dashboard',
+  '/analytics':    'Analytics',
+  '/planner':      'Task Planner',
+  '/calendar':     'Calendar',
+  '/competitions': 'Competitions',
+  '/dsa-sheets':   'DSA Sheets',
+  '/groups':       'Group Chat',
+  '/leaderboard':  'Leaderboard',
   '/integrations': 'Integrations',
-  '/settings': 'Settings',
-  '/onboarding': 'Getting Started',
+  '/settings':     'Settings',
+  '/courses':      'Course Tracker',
+  '/career':       'Career & Resume',
+  '/editor':       'Code Editor',
+  '/youtube':      'YouTube Dashboard',
+  '/onboarding':   'Getting Started',
+}
+
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark'
+  })
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  const toggle = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+  return { theme, toggle }
 }
 
 export default function Header({ onMenuClick }) {
@@ -27,6 +44,7 @@ export default function Header({ onMenuClick }) {
   const notifRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
+  const { theme, toggle } = useTheme()
 
   useEffect(() => {
     if (user) fetchNotifications()
@@ -46,38 +64,84 @@ export default function Header({ onMenuClick }) {
 
   return (
     <header
-      className="h-14 border-b border-zinc-800/60 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30"
-      style={{ background: 'rgba(9, 9, 11, 0.8)', backdropFilter: 'blur(12px)' }}
+      className="h-14 border-b flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 theme-transition"
+      style={{
+        background: 'color-mix(in srgb, var(--bg-primary) 85%, transparent)',
+        borderColor: 'var(--border)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+      }}
     >
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="text-zinc-500 hover:text-zinc-300 lg:hidden p-1.5 rounded-lg hover:bg-zinc-800/50 transition-colors"
+          className="text-[color:var(--text-muted)] hover:text-[color:var(--text-primary)] lg:hidden p-1.5 rounded-lg transition-colors"
+          style={{ background: 'transparent' }}
           id="mobile-menu-button"
         >
           <Menu className="w-5 h-5" />
         </button>
-
-        <h1 className="text-[15px] font-semibold text-zinc-100">{pageTitle}</h1>
+        <h1 className="text-[15px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+          {pageTitle}
+        </h1>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {/* Points badge */}
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800/50 border border-zinc-800">
-          <span className="text-xs font-semibold text-amber-400">{user?.points || 0}</span>
-          <span className="text-xs text-zinc-500">pts</span>
+        <div
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+        >
+          <span className="text-xs font-semibold" style={{ color: '#f59e0b' }}>
+            {user?.points || 0}
+          </span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>pts</span>
         </div>
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggle}
+          className="p-2 rounded-lg transition-all"
+          style={{ color: 'var(--text-muted)' }}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          id="theme-toggle"
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'var(--bg-hover)'
+            e.currentTarget.style.color = 'var(--text-primary)'
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'var(--text-muted)'
+          }}
+        >
+          {theme === 'dark'
+            ? <Sun className="w-[18px] h-[18px]" />
+            : <Moon className="w-[18px] h-[18px]" />
+          }
+        </button>
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setShowNotifs(!showNotifs)}
-            className="relative p-2 text-zinc-500 hover:text-zinc-300 rounded-lg hover:bg-zinc-800/50 transition-colors"
+            className="relative p-2 rounded-lg transition-all"
+            style={{ color: 'var(--text-muted)' }}
             id="notification-button"
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--bg-hover)'
+              e.currentTarget.style.color = 'var(--text-primary)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = 'var(--text-muted)'
+            }}
           >
             <Bell className="w-[18px] h-[18px]" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-indigo-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">
+              <span
+                className="absolute top-1 right-1 w-4 h-4 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                style={{ background: 'var(--accent)' }}
+              >
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -90,17 +154,23 @@ export default function Header({ onMenuClick }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.96 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-80 rounded-xl overflow-hidden shadow-2xl z-50"
-                style={{ background: '#1c1c1e', border: '1px solid rgba(63, 63, 70, 0.5)' }}
+                className="absolute right-0 top-full mt-2 w-80 rounded-xl overflow-hidden z-50"
+                style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
+                  boxShadow: 'var(--shadow-lg)',
+                }}
               >
-                <div className="px-4 py-3 border-b border-zinc-800/60">
-                  <p className="text-sm font-semibold text-zinc-100">Notifications</p>
+                <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    Notifications
+                  </p>
                 </div>
                 <div className="max-h-72 overflow-y-auto">
                   {notifications.length === 0 ? (
                     <div className="py-10 text-center">
-                      <Bell className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
-                      <p className="text-sm text-zinc-500">No notifications yet</p>
+                      <Bell className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--text-faint)' }} />
+                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No notifications yet</p>
                     </div>
                   ) : (
                     notifications.map((n) => (
@@ -111,12 +181,17 @@ export default function Header({ onMenuClick }) {
                           if (n.link) navigate(n.link)
                           setShowNotifs(false)
                         }}
-                        className={`w-full text-left px-4 py-3 border-b border-zinc-800/30 hover:bg-zinc-800/40 transition-colors ${
-                          !n.read ? 'bg-indigo-500/5' : ''
-                        }`}
+                        className="w-full text-left px-4 py-3 transition-colors"
+                        style={{
+                          borderBottom: '1px solid var(--border-subtle)',
+                          background: !n.read ? 'var(--accent-muted)' : 'transparent',
+                          color: 'var(--text-primary)',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                        onMouseLeave={e => e.currentTarget.style.background = !n.read ? 'var(--accent-muted)' : 'transparent'}
                       >
-                        <p className="text-sm text-zinc-200">{n.message}</p>
-                        <p className="text-xs text-zinc-600 mt-1">
+                        <p className="text-sm">{n.message}</p>
+                        <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
                           {new Date(n.createdAt).toLocaleDateString()}
                         </p>
                       </button>
@@ -131,8 +206,10 @@ export default function Header({ onMenuClick }) {
         {/* User avatar */}
         <button
           onClick={() => navigate('/settings')}
-          className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-xs font-semibold text-white hover:opacity-90 transition-opacity"
+          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white hover:opacity-90 transition-opacity"
+          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
           id="user-avatar-button"
+          title={user?.name || 'Settings'}
         >
           {user?.name?.charAt(0)?.toUpperCase() || 'U'}
         </button>

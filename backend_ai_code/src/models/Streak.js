@@ -31,6 +31,4 @@ const streakSchema = mongoose.Schema(
   }
 );
 
-streakSchema.index({ userId: 1 });
-
 module.exports = mongoose.model("Streak", streakSchema);

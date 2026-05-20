@@ -5,6 +5,50 @@ const crypto = require("crypto");
 // Generate a random 6-character invite code
 const generateCode = () => crypto.randomBytes(3).toString("hex").toUpperCase();
 
+// @desc    Send a message to a group (REST fallback)
+// @route   POST /api/groups/:id/messages
+// @access  Private
+const sendMessage = async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: "Message content is required" });
+    }
+
+    const group = await GroupChat.findById(req.params.id);
+    if (!group) return res.status(404).json({ message: "Group not found" });
+
+    if (!group.members.some((m) => m.toString() === req.user.id)) {
+      return res.status(403).json({ message: "Not a member of this group" });
+    }
+
+    const message = {
+      sender: req.user.id,
+      content: content.trim(),
+      type: "text",
+      timestamp: new Date(),
+    };
+
+    group.messages.push(message);
+    await group.save();
+
+    const savedMsg = group.messages[group.messages.length - 1];
+    const sender = await User.findById(req.user.id).select("name email avatar");
+
+    const populated = {
+      _id: savedMsg._id,
+      sender: { _id: sender._id, name: sender.name, email: sender.email, avatar: sender.avatar },
+      content: savedMsg.content,
+      type: savedMsg.type,
+      timestamp: savedMsg.timestamp,
+    };
+
+    res.status(201).json(populated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Create a new group
 // @route   POST /api/groups
 // @access  Private
@@ -221,4 +265,6 @@ module.exports = {
   getMyGroups,
   getGroupMessages,
   getGroupDetails,
+  sendMessage,
 };
+

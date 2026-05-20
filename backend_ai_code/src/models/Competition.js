@@ -54,6 +54,6 @@ const competitionSchema = mongoose.Schema(
 );
 
 competitionSchema.index({ startTime: 1 });
-competitionSchema.index({ platform: 1 });
+competitionSchema.index({ platform: 1, title: 1 }, { unique: true });
 
 module.exports = mongoose.model("Competition", competitionSchema);

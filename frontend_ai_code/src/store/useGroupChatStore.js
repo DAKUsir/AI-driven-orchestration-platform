@@ -32,19 +32,23 @@ const useGroupChatStore = create((set, get) => ({
     })
 
     socket.on('receive-message', (message) => {
-      set((state) => ({ messages: [...state.messages, message] }))
+      set((state) => {
+        // Avoid duplicates — sender already added via REST
+        if (state.messages.some(m => m._id?.toString() === message._id?.toString())) return state
+        return { messages: [...state.messages, message] }
+      })
     })
 
     socket.on('online-users', (users) => {
       set({ onlineUsers: users })
     })
 
-    socket.on('user-typing', ({ userId, isTyping }) => {
+    socket.on('user-typing', ({ userId, userName, isTyping }) => {
       set((state) => {
-        if (isTyping && !state.typingUsers.includes(userId)) {
-          return { typingUsers: [...state.typingUsers, userId] }
+        if (isTyping && !state.typingUsers.find(u => u.userId === userId)) {
+          return { typingUsers: [...state.typingUsers, { userId, userName }] }
         } else if (!isTyping) {
-          return { typingUsers: state.typingUsers.filter((id) => id !== userId) }
+          return { typingUsers: state.typingUsers.filter((u) => u.userId !== userId) }
         }
         return state
       })
@@ -151,12 +155,15 @@ const useGroupChatStore = create((set, get) => ({
 
   sendMessage: async (content) => {
     const { activeGroup } = get()
-    if (!activeGroup || !socket) return
+    if (!activeGroup) return
 
     try {
+      // 1. Save via REST — returns the populated message
       const { data } = await api.post(`/groups/${activeGroup._id}/messages`, { content })
+      // 2. Add to local state immediately (sender sees it right away)
       set((state) => ({ messages: [...state.messages, data] }))
-      socket.emit('send-message', { groupId: activeGroup._id, message: data })
+      // 3. Emit via socket so other group members get real-time update
+      if (socket) socket.emit('send-message', { groupId: activeGroup._id, content })
     } catch (err) {
       console.error('Failed to send message:', err)
     }

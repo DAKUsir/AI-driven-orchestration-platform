@@ -46,4 +46,6 @@ const sheetLinkSchema = mongoose.Schema(
   }
 );
 
+sheetLinkSchema.index({ title: 1 }, { unique: true });
+
 module.exports = mongoose.model("SheetLink", sheetLinkSchema);

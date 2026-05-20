@@ -101,6 +101,25 @@ const useTaskStore = create((set, get) => ({
       set({ error: err.message })
     }
   },
+  generateTasksWithAI: async (goal, category, count = 5) => {
+    try {
+      const res = await api.post('/ai/generate-tasks', { goal, category, count })
+      const aiTasks = res.data.tasks || []
+      const created = []
+      for (const task of aiTasks) {
+        const r = await api.post('/tasks', {
+          ...task,
+          tags: [goal.toLowerCase().replace(/\s+/g, '-')],
+        })
+        created.push(r.data)
+      }
+      set((s) => ({ tasks: [...created, ...s.tasks] }))
+      return created
+    } catch (err) {
+      set({ error: err.message })
+      throw err
+    }
+  },
 }))
 
 export default useTaskStore

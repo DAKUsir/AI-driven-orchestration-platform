@@ -171,7 +171,7 @@ io.on("connection", async (socket) => {
   socket.on("send-message", async ({ groupId, content }) => {
     try {
       const group = await GroupChat.findById(groupId);
-      if (!group || !group.members.includes(userId)) return;
+      if (!group || !group.members.some(m => m.toString() === userId)) return;
 
       const message = {
         sender: userId,
@@ -185,7 +185,7 @@ io.on("connection", async (socket) => {
 
       const sender = await User.findById(userId).select("name email avatar");
 
-      io.to(groupId).emit("new-message", {
+      io.to(groupId).emit("receive-message", {
         _id: group.messages[group.messages.length - 1]._id,
         sender: {
           _id: sender._id,

@@ -5,9 +5,10 @@ import {
   PlayCircle, RefreshCw, Loader2, ExternalLink, Trash2,
   Clock, CheckCircle, Filter, ChevronDown, ChevronUp,
   Calendar, ListTodo, AlertCircle, X, BarChart3,
-  Plus, LinkIcon,
+  Plus, LinkIcon, Sparkles, Wand2, Search,
 } from 'lucide-react'
 import useYoutubeStore from '../store/useYoutubeStore'
+import api from '../utils/api'
 
 const categoryLabels = {
   dsa: 'DSA', 'web-dev': 'Web Dev', python: 'Python', java: 'Java',
@@ -68,6 +69,15 @@ export default function YoutubeDashboard() {
   const [playlistUrl, setPlaylistUrl] = useState('')
   const [addSuccess, setAddSuccess] = useState(null)
 
+  // AI discovery state
+  const [showAI, setShowAI] = useState(false)
+  const [aiTopic, setAiTopic] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState([])
+  const [aiError, setAiError] = useState('')
+  const [addingIds, setAddingIds] = useState(new Set())
+  const [addedIds, setAddedIds] = useState(new Set())
+
   useEffect(() => {
     fetchStatus()
     // Always fetch courses (works for both OAuth and manual playlists)
@@ -115,6 +125,33 @@ export default function YoutubeDashboard() {
     setAddSuccess(null)
   }
 
+  const handleAISearch = async () => {
+    if (!aiTopic.trim()) return
+    setAiLoading(true)
+    setAiError('')
+    setAiSuggestions([])
+    try {
+      const { data } = await api.post('/ai/youtube-suggest', { topic: aiTopic.trim() })
+      setAiSuggestions(data.suggestions || [])
+    } catch (err) {
+      setAiError(err.response?.data?.message || 'Failed to get suggestions')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  const handleAIAdd = async (suggestion, idx) => {
+    setAddingIds(prev => new Set(prev).add(idx))
+    try {
+      await addPlaylist(suggestion.url)
+      setAddedIds(prev => new Set(prev).add(idx))
+    } catch (err) {
+      console.error('Failed to add playlist:', err)
+    } finally {
+      setAddingIds(prev => { const s = new Set(prev); s.delete(idx); return s })
+    }
+  }
+
   // Stats
   const totalCourses = courses.length
   const inProgress = courses.filter((c) => c.status === 'in-progress').length
@@ -129,13 +166,13 @@ export default function YoutubeDashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100 tracking-tight flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <span className="text-2xl">🎬</span> YouTube Dashboard
           </h1>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
             {connected ? (
               <>
-                Connected as <span className="text-zinc-300">{channelTitle || 'YouTube User'}</span>
+                Connected as <span style={{ color: 'var(--text-primary)' }}>{channelTitle || 'YouTube User'}</span>
                 {lastSynced && <> · Last synced {timeSince(lastSynced)}</>}
               </>
             ) : (
@@ -144,18 +181,135 @@ export default function YoutubeDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setShowAI(!showAI); setAiSuggestions([]); setAiError('') }}
+            className={`btn btn-sm ${showAI ? 'btn-primary' : 'btn-secondary'}`}
+            id="ai-discover-btn"
+          >
+            <Sparkles className="w-4 h-4" /> AI Discover
+          </button>
           <button onClick={() => { setShowAddModal(true); setAddSuccess(null) }}
-            className="btn btn-primary btn-sm" id="add-playlist-btn">
+            className="btn btn-secondary btn-sm" id="add-playlist-btn">
             <Plus className="w-4 h-4" /> Add Playlist
           </button>
           {connected && (
-            <button onClick={handleSync} disabled={syncing} className="btn btn-secondary btn-sm" id="sync-youtube-btn">
+            <button onClick={handleSync} disabled={syncing} className="btn btn-ghost btn-sm btn-icon" id="sync-youtube-btn" title="Sync">
               {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-              {syncing ? 'Syncing...' : 'Sync'}
             </button>
           )}
         </div>
       </div>
+
+      {/* AI Discovery Panel */}
+      <AnimatePresence>
+        {showAI && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -8, height: 0 }}
+            className="card p-5 overflow-hidden"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'var(--accent-muted)' }}
+              >
+                <Wand2 className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  AI Course Discovery
+                </h3>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  Describe a topic and AI will find the best YouTube playlists for you
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+                <input
+                  type="text"
+                  value={aiTopic}
+                  onChange={e => setAiTopic(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAISearch()}
+                  placeholder="e.g. DSA for interviews, Python for ML, React advanced patterns..."
+                  className="input input-with-icon"
+                  id="ai-topic-input"
+                />
+              </div>
+              <button
+                onClick={handleAISearch}
+                disabled={aiLoading || !aiTopic.trim()}
+                className="btn btn-primary"
+                id="ai-search-btn"
+              >
+                {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                {aiLoading ? 'Searching...' : 'Find'}
+              </button>
+            </div>
+
+            {aiError && (
+              <p className="text-sm mb-3" style={{ color: 'var(--danger)' }}>{aiError}</p>
+            )}
+
+            {aiSuggestions.length > 0 && (
+              <div className="space-y-2">
+                {aiSuggestions.map((s, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="flex items-start gap-3 p-3 rounded-xl"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-white text-lg"
+                      style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}
+                    >
+                      ▶
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{s.title}</p>
+                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                        {s.channel} · {s.difficulty} · ~{s.estimatedHours}h
+                      </p>
+                      <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'var(--text-muted)' }}>{s.description}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <a
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-ghost btn-sm btn-icon"
+                        title="Preview"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                      <button
+                        onClick={() => handleAIAdd(s, i)}
+                        disabled={addingIds.has(i) || addedIds.has(i)}
+                        className={`btn btn-sm ${addedIds.has(i) ? 'btn-secondary' : 'btn-primary'}`}
+                        style={{ minWidth: 70 }}
+                      >
+                        {addingIds.has(i) ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : addedIds.has(i) ? (
+                          <><CheckCircle className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} /> Added</>
+                        ) : (
+                          <><Plus className="w-3.5 h-3.5" /> Add</>
+                        )}
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Error */}
       <AnimatePresence>
