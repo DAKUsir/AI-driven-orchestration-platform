@@ -21,6 +21,12 @@ const getCompetitions = async (req, res) => {
       filter.endTime = { $lt: now };
     }
 
+    // Auto-seed on first fetch if DB is empty
+    const count = await Competition.countDocuments();
+    if (count === 0) {
+      await _doSeedCompetitions();
+    }
+
     const competitions = await Competition.find(filter).sort({ startTime: 1 });
     res.json(competitions);
   } catch (error) {
@@ -69,12 +75,9 @@ const removeReminder = async (req, res) => {
   }
 };
 
-// @desc    Seed competitions from Codeforces API + static entries
-// @route   POST /api/competitions/seed
-// @access  Private (admin)
-const seedCompetitions = async (req, res) => {
-  try {
-    let seeded = 0;
+// ── Internal helper — seeds competitions, no req/res needed ──
+async function _doSeedCompetitions() {
+  let seeded = 0;
 
     // ── Codeforces API ──
     try {
@@ -162,6 +165,15 @@ const seedCompetitions = async (req, res) => {
       if (result.upsertedCount) seeded++;
     }
 
+  return seeded;
+}
+
+// @desc    Seed competitions from Codeforces API + static entries
+// @route   POST /api/competitions/seed
+// @access  Private (admin)
+const seedCompetitions = async (req, res) => {
+  try {
+    const seeded = await _doSeedCompetitions();
     res.json({ message: `Seeded ${seeded} competitions` });
   } catch (error) {
     res.status(500).json({ message: error.message });
