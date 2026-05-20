@@ -2,5 +2,7 @@ fastapi
 uvicorn
 python-dotenv
 python-multipart
+openai
+gradio_client
 azure-ai-inference
 azure-core
