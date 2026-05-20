@@ -5,6 +5,7 @@ const useAuthStore = create((set, get) => ({
   user: null,
   token: localStorage.getItem('token') || null,
   loading: false,
+  authAttempted: false,
   error: null,
 
   login: async (email, password) => {
@@ -55,14 +56,14 @@ const useAuthStore = create((set, get) => ({
     try {
       const { data } = await api.get('/auth/me')
       const onboardingCompleted = data.onboardingCompleted ?? true
-      set({ user: { ...data, onboardingCompleted }, loading: false })
+      set({ user: { ...data, onboardingCompleted }, loading: false, authAttempted: true })
     } catch (err) {
       // Only clear token on 401 (invalid/expired) — not on network errors
       if (err.response?.status === 401) {
         localStorage.removeItem('token')
-        set({ user: null, token: null, loading: false })
+        set({ user: null, token: null, loading: false, authAttempted: true })
       } else {
-        set({ loading: false })
+        set({ loading: false, authAttempted: true })
       }
     }
   },
