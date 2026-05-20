@@ -3,22 +3,34 @@ services:
     name: finishit-backend
     runtime: node
     rootDir: backend_ai_code
-    buildCommand: npm install
-    startCommand: node src/server.js
+    buildCommand: pip install -r requirements.txt && npm install
+    startCommand: bash start.sh
     envVars:
       - key: NODE_ENV
         value: production
       - key: MONGO_URI
-        sync: false          # Set manually in Render dashboard
+        sync: false
       - key: JWT_SECRET
-        generateValue: true  # Render auto-generates a secure random value
+        sync: false
       - key: SESSION_SECRET
-        generateValue: true
+        sync: false
       - key: GITHUB_TOKEN
-        sync: false          # Set manually in Render dashboard
+        sync: false
       - key: FRONTEND_URL
-        sync: false          # Set to your Vercel URL after deploying frontend
+        sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: EMAIL_SENDER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: AI_SERVICE_URL
+        value: http://localhost:8000
+      - key: BACKEND_URL
+        value: https://finishit-backend.onrender.com
