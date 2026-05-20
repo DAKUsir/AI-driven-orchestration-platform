@@ -10,7 +10,13 @@ const useSheetStore = create((set) => ({
     try {
       const url = tag ? `/sheets?tag=${tag}` : '/sheets'
       const res = await api.get(url)
-      set({ sheets: res.data, loading: false })
+      const seen = new Set()
+      const unique = res.data.filter(s => {
+        if (seen.has(s._id)) return false
+        seen.add(s._id)
+        return true
+      })
+      set({ sheets: unique, loading: false })
     } catch {
       set({ loading: false })
     }

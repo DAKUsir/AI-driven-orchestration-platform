@@ -36,11 +36,6 @@ export default function CompetitionsPage() {
   const [statusFilter, setStatusFilter] = useState('upcoming')
 
   useEffect(() => {
-    // Seed data on first load only; fetching is handled by the filter effect below
-    seedCompetitions()
-  }, [])
-
-  useEffect(() => {
     const filters = {}
     if (platformFilter) filters.platform = platformFilter
     if (statusFilter) filters.status = statusFilter

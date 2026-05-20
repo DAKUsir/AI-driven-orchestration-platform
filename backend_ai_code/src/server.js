@@ -35,6 +35,7 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const GroupChat = require("./models/GroupChat");
 const User = require("./models/User");
+const { setIO } = require("./utils/ioSingleton");
 
 
 
@@ -53,6 +54,8 @@ const io = new Server(server, {
   },
 });
 
+// Make io accessible from controllers
+setIO(io);
 // Passport config
 require("./config/passport")(passport);
 

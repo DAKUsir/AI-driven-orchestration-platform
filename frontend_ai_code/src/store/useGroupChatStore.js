@@ -158,12 +158,10 @@ const useGroupChatStore = create((set, get) => ({
     if (!activeGroup) return
 
     try {
-      // 1. Save via REST — returns the populated message
+      // Save via REST — the server controller broadcasts to other members via socket
       const { data } = await api.post(`/groups/${activeGroup._id}/messages`, { content })
-      // 2. Add to local state immediately (sender sees it right away)
+      // Show immediately for the sender (others get it via server socket broadcast)
       set((state) => ({ messages: [...state.messages, data] }))
-      // 3. Emit via socket so other group members get real-time update
-      if (socket) socket.emit('send-message', { groupId: activeGroup._id, content })
     } catch (err) {
       console.error('Failed to send message:', err)
     }

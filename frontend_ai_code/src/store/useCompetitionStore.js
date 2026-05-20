@@ -10,7 +10,14 @@ const useCompetitionStore = create((set) => ({
     try {
       const params = new URLSearchParams(filters).toString()
       const res = await api.get(`/competitions${params ? `?${params}` : ''}`)
-      set({ competitions: res.data, loading: false })
+      // Deduplicate by _id in case DB has existing duplicates
+      const seen = new Set()
+      const unique = res.data.filter(c => {
+        if (seen.has(c._id)) return false
+        seen.add(c._id)
+        return true
+      })
+      set({ competitions: unique, loading: false })
     } catch {
       set({ loading: false })
     }

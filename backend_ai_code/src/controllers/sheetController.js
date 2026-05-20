@@ -126,11 +126,12 @@ const seedSheets = async (req, res) => {
 
     let seeded = 0;
     for (const s of seeds) {
-      const exists = await SheetLink.findOne({ title: s.title });
-      if (!exists) {
-        await SheetLink.create(s);
-        seeded++;
-      }
+      const result = await SheetLink.updateOne(
+        { title: s.title },
+        { $setOnInsert: s },
+        { upsert: true }
+      );
+      if (result.upsertedCount) seeded++;
     }
 
     res.json({ message: `Seeded ${seeded} DSA sheets` });

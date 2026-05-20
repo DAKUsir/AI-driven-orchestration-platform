@@ -1,6 +1,7 @@
 const GroupChat = require("../models/GroupChat");
 const User = require("../models/User");
 const crypto = require("crypto");
+const { getIO } = require("../utils/ioSingleton");
 
 // Generate a random 6-character invite code
 const generateCode = () => crypto.randomBytes(3).toString("hex").toUpperCase();
@@ -42,6 +43,12 @@ const sendMessage = async (req, res) => {
       type: savedMsg.type,
       timestamp: savedMsg.timestamp,
     };
+
+    // Broadcast to all OTHER members in the group room (sender already has it locally)
+    const io = getIO();
+    if (io) {
+      io.to(req.params.id).emit("receive-message", populated);
+    }
 
     res.status(201).json(populated);
   } catch (error) {

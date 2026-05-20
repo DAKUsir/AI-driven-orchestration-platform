@@ -89,22 +89,23 @@ const seedCompetitions = async (req, res) => {
       for (const c of upcoming) {
         const startTime = new Date(c.startTimeSeconds * 1000);
         const endTime = new Date(startTime.getTime() + c.durationSeconds * 1000);
-        const exists = await Competition.findOne({
-          platform: "codeforces",
-          title: c.name,
-        });
-        if (!exists) {
-          await Competition.create({
-            title: c.name,
-            platform: "codeforces",
-            url: `https://codeforces.com/contest/${c.id}`,
-            startTime,
-            endTime,
-            duration: `${Math.round(c.durationSeconds / 3600)}h`,
-            tags: ["competitive-programming"],
-          });
-          seeded++;
-        }
+        // Atomic upsert — no race condition, no duplicates
+        const result = await Competition.updateOne(
+          { platform: "codeforces", title: c.name },
+          {
+            $setOnInsert: {
+              title: c.name,
+              platform: "codeforces",
+              url: `https://codeforces.com/contest/${c.id}`,
+              startTime,
+              endTime,
+              duration: `${Math.round(c.durationSeconds / 3600)}h`,
+              tags: ["competitive-programming"],
+            },
+          },
+          { upsert: true }
+        );
+        if (result.upsertedCount) seeded++;
       }
     } catch (err) {
       console.error("[Seed] Codeforces API error:", err.message);
@@ -152,15 +153,13 @@ const seedCompetitions = async (req, res) => {
     ];
 
     for (const entry of staticContests) {
-      const exists = await Competition.findOne({
-        platform: entry.platform,
-        title: entry.title,
-      });
-      if (!exists) {
-        const endTime = entry.endTime || new Date(entry.startTime.getTime() + 5400000);
-        await Competition.create({ ...entry, endTime });
-        seeded++;
-      }
+      const endTime = entry.endTime || new Date(entry.startTime.getTime() + 5400000);
+      const result = await Competition.updateOne(
+        { platform: entry.platform, title: entry.title },
+        { $setOnInsert: { ...entry, endTime } },
+        { upsert: true }
+      );
+      if (result.upsertedCount) seeded++;
     }
 
     res.json({ message: `Seeded ${seeded} competitions` });

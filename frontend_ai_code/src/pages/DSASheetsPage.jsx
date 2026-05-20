@@ -24,11 +24,6 @@ export default function DSASheetsPage() {
   const [activeTag, setActiveTag] = useState('')
 
   useEffect(() => {
-    // Seed data on first load only; fetching is handled by the tag effect below
-    seedSheets()
-  }, [])
-
-  useEffect(() => {
     fetchSheets(activeTag)
   }, [activeTag])
 
