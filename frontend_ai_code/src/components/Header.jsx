@@ -207,7 +207,7 @@ export default function Header({ onMenuClick }) {
         <button
           onClick={() => navigate('/settings')}
           className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white hover:opacity-90 transition-opacity"
-          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+          style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
           id="user-avatar-button"
           title={user?.name || 'Settings'}
         >

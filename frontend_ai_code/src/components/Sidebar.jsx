@@ -32,6 +32,7 @@ const navGroups = [
       { to: '/courses',  icon: GraduationCap, label: 'Course Tracker' },
       { to: '/career',   icon: Briefcase,     label: 'Resume & Career' },
       { to: '/editor',   icon: Code2,         label: 'Code Editor' },
+      { to: 'https://mockprepgroq.vercel.app/', icon: Target, label: 'Interview Prep', external: true },
     ],
   },
   {
@@ -93,7 +94,7 @@ export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) 
           <div className="flex items-center gap-2.5 min-w-0 px-1">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+              style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
             >
               <Target className="w-3.5 h-3.5 text-white" />
             </div>
@@ -132,39 +133,58 @@ export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) 
                 </p>
               )}
               <div className="space-y-0.5">
-                {group.items.map(({ to, icon: Icon, label }) => (
-                  <NavLink
-                    key={to}
-                    to={to}
-                    onClick={onClose}
-                    title={collapsed ? label : undefined}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 relative group ${
-                        isActive ? 'nav-active' : 'nav-default'
-                      }`
-                    }
-                    style={({ isActive }) => ({
-                      color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                      background: isActive ? 'var(--bg-active)' : 'transparent',
-                    })}
-                  >
-                    {({ isActive }) => (
-                      <>
-                        {isActive && (
-                          <div
-                            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
-                            style={{ background: 'var(--accent)' }}
-                          />
-                        )}
-                        <Icon
-                          className="w-[17px] h-[17px] flex-shrink-0"
-                          style={{ color: isActive ? 'var(--accent)' : 'inherit' }}
-                        />
+                {group.items.map(({ to, icon: Icon, label, external }) => {
+                  if (external) {
+                    return (
+                      <a
+                        key={to}
+                        href={to}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={onClose}
+                        title={collapsed ? label : undefined}
+                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 relative group nav-default hover:text-[color:var(--text-primary)] hover:bg-[color:var(--bg-hover)]"
+                        style={{ color: 'var(--text-muted)', background: 'transparent' }}
+                      >
+                        <Icon className="w-[17px] h-[17px] flex-shrink-0" style={{ color: 'inherit' }} />
                         {!collapsed && <span className="truncate">{label}</span>}
-                      </>
-                    )}
-                  </NavLink>
-                ))}
+                      </a>
+                    )
+                  }
+                  return (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      onClick={onClose}
+                      title={collapsed ? label : undefined}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 relative group ${
+                          isActive ? 'nav-active' : 'nav-default'
+                        }`
+                      }
+                      style={({ isActive }) => ({
+                        color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
+                        background: isActive ? 'var(--bg-active)' : 'transparent',
+                      })}
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive && (
+                            <div
+                              className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full"
+                              style={{ background: 'var(--accent)' }}
+                            />
+                          )}
+                          <Icon
+                            className="w-[17px] h-[17px] flex-shrink-0"
+                            style={{ color: isActive ? 'var(--accent)' : 'inherit' }}
+                          />
+                          {!collapsed && <span className="truncate">{label}</span>}
+                        </>
+                      )}
+                    </NavLink>
+                  )
+                })}
               </div>
             </div>
           ))}
@@ -179,7 +199,7 @@ export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) 
             <div className="flex items-center gap-3 px-3 py-2 mb-1 rounded-lg">
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
               >
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
@@ -196,7 +216,7 @@ export default function Sidebar({ open, collapsed, onClose, onToggleCollapse }) 
             <div className="flex justify-center py-2 mb-1">
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-                style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
               >
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>

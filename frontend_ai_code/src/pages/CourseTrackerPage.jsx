@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   PlayCircle, BookOpen, Clock, Loader2, CheckCircle, Search,
-  Plus, X, Trash2, ExternalLink, Filter, TrendingUp, AlertCircle, Video, BookOpen as BookOpenIcon, GraduationCap as GradCap, Library, Palette, Book
+  Plus, X, Trash2, ExternalLink, Filter, TrendingUp, AlertCircle, Video, BookOpen as BookOpenIcon, GraduationCap, Library, Palette, Book
 } from 'lucide-react'
 import useCourseStore from '../store/useCourseStore'
 
 const platformConfig = {
   youtube: { label: 'YouTube', icon: <Video className="w-5 h-5" />, color: 'from-red-500 to-rose-500', badge: 'bg-red-500/15 text-red-400' },
   coursera: { label: 'Coursera', icon: <BookOpenIcon className="w-5 h-5" />, color: 'from-blue-500 to-cyan-500', badge: 'bg-blue-500/15 text-blue-400' },
-  udemy: { label: 'Udemy', icon: <GradCap className="w-5 h-5" />, color: 'from-orange-500 to-orange-500', badge: 'bg-orange-500/15 text-orange-400' },
+  udemy: { label: 'Udemy', icon: <GraduationCap className="w-5 h-5" />, color: 'from-orange-500 to-orange-500', badge: 'bg-orange-500/15 text-orange-400' },
   edx: { label: 'edX', icon: <Library className="w-5 h-5" />, color: 'from-sky-500 to-blue-500', badge: 'bg-sky-500/15 text-sky-400' },
   skillshare: { label: 'Skillshare', icon: <Palette className="w-5 h-5" />, color: 'from-emerald-500 to-green-500', badge: 'bg-emerald-500/15 text-emerald-400' },
   other: { label: 'Other', icon: <Book className="w-5 h-5" />, color: 'from-zinc-500 to-zinc-600', badge: 'bg-zinc-500/15 text-zinc-400' },

@@ -277,7 +277,7 @@ export default function GroupChatPage() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                  style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
                 >
                   {group.name.charAt(0).toUpperCase()}
                 </div>
@@ -323,7 +323,7 @@ export default function GroupChatPage() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                  style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
                 >
                   {activeGroup.name.charAt(0).toUpperCase()}
                 </div>
@@ -426,7 +426,7 @@ export default function GroupChatPage() {
                       {!isMe && (
                         <div
                           className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0 mt-1"
-                          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                          style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
                         >
                           {item.sender?.name?.charAt(0)?.toUpperCase() || 'U'}
                         </div>
@@ -505,7 +505,7 @@ export default function GroupChatPage() {
                           <div key={member._id || member} className="flex items-center gap-2.5">
                             <div
                               className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
-                              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                              style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
                             >
                               {member.name?.charAt(0)?.toUpperCase() || 'U'}
                             </div>

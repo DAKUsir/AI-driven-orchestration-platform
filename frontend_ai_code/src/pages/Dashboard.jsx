@@ -200,7 +200,7 @@ export default function Dashboard() {
                 </span>
                 <div
                   className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold text-white flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                  style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}
                 >
                   {entry.name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>

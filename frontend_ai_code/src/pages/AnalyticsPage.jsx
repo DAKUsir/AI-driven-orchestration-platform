@@ -98,7 +98,7 @@ export default function AnalyticsPage() {
                   <PolarGrid stroke="#27272a" />
                   <PolarAngleAxis dataKey="skill" tick={{ fill: '#a1a1aa', fontSize: 11 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#52525b', fontSize: 10 }} />
-                  <Radar name="Skills" dataKey="value" stroke="#6366f1" fill="#6366f1" fillOpacity={0.15} strokeWidth={2} />
+                  <Radar name="Skills" dataKey="value" stroke="#f97316" fill="#f97316" fillOpacity={0.15} strokeWidth={2} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
