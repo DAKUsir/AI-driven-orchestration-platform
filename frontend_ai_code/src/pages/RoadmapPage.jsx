@@ -23,10 +23,10 @@ const typeColors = {
 const tracks = [
   { id: 'frontend', label: 'Frontend Development', icon: Globe, color: 'from-blue-500 to-cyan-500', desc: 'React, Vue, CSS, performance' },
   { id: 'backend', label: 'Backend Development', icon: Server, color: 'from-emerald-500 to-teal-500', desc: 'APIs, databases, microservices' },
-  { id: 'fullstack', label: 'Full-Stack', icon: Layers, color: 'from-indigo-500 to-violet-500', desc: 'End-to-end web development' },
+  { id: 'fullstack', label: 'Full-Stack', icon: Layers, color: 'from-orange-500 to-orange-500', desc: 'End-to-end web development' },
   { id: 'data-science', label: 'Data Science', icon: BarChart3, color: 'from-amber-500 to-orange-500', desc: 'ML, analytics, visualization' },
   { id: 'devops', label: 'DevOps & Cloud', icon: Terminal, color: 'from-rose-500 to-pink-500', desc: 'CI/CD, Docker, Kubernetes, AWS' },
-  { id: 'mobile', label: 'Mobile Development', icon: Smartphone, color: 'from-purple-500 to-fuchsia-500', desc: 'React Native, Flutter, Swift' },
+  { id: 'mobile', label: 'Mobile Development', icon: Smartphone, color: 'from-orange-500 to-orange-500', desc: 'React Native, Flutter, Swift' },
   { id: 'ml-engineer', label: 'ML Engineering', icon: Brain, color: 'from-red-500 to-rose-500', desc: 'Deep learning, MLOps, NLP' },
   { id: 'competitive', label: 'Competitive Programming', icon: Cpu, color: 'from-yellow-500 to-amber-500', desc: 'DSA, contest prep, problem solving' },
 ]
@@ -129,7 +129,7 @@ export default function RoadmapPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center mx-auto mb-4">
+            className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center mx-auto mb-4">
             <Rocket className="w-7 h-7 text-white" />
           </motion.div>
           <h1 className="text-2xl font-bold text-zinc-100">Build Your Roadmap</h1>
@@ -140,7 +140,7 @@ export default function RoadmapPage() {
         <div className="flex items-center justify-center gap-2">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === wizStep ? 'w-10 bg-indigo-500' : i < wizStep ? 'w-6 bg-indigo-500/40' : 'w-6 bg-zinc-800'
+              i === wizStep ? 'w-10 bg-orange-500' : i < wizStep ? 'w-6 bg-orange-500/40' : 'w-6 bg-zinc-800'
             }`} />
           ))}
         </div>
@@ -150,7 +150,7 @@ export default function RoadmapPage() {
             {/* Step 0: Track */}
             {wizStep === 0 && (
               <motion.div key="track" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <p className="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-1">Step 1 of 4</p>
+                <p className="text-xs font-medium text-orange-400 uppercase tracking-wider mb-1">Step 1 of 4</p>
                 <h2 className="text-lg font-bold text-zinc-100 mb-1">Choose Your Track</h2>
                 <p className="text-sm text-zinc-500 mb-5">What area do you want to specialize in?</p>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -160,7 +160,7 @@ export default function RoadmapPage() {
                     return (
                       <button key={t.id} onClick={() => { setSelectedTrack(t.id); setSelectedRole(null); setSelectedSkills([]) }}
                         className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
-                          isSelected ? 'bg-indigo-500/8 border-indigo-500/25' : 'border-zinc-800 hover:border-zinc-700'
+                          isSelected ? 'bg-orange-500/8 border-orange-500/25' : 'border-zinc-800 hover:border-zinc-700'
                         }`}>
                         <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${t.color} flex items-center justify-center flex-shrink-0`}>
                           <Icon className="w-4 h-4 text-white" />
@@ -179,7 +179,7 @@ export default function RoadmapPage() {
             {/* Step 1: Specific Role */}
             {wizStep === 1 && (
               <motion.div key="role" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <p className="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-1">Step 2 of 4</p>
+                <p className="text-xs font-medium text-orange-400 uppercase tracking-wider mb-1">Step 2 of 4</p>
                 <h2 className="text-lg font-bold text-zinc-100 mb-1">Target Role</h2>
                 <p className="text-sm text-zinc-500 mb-5">Which specific role are you aiming for?</p>
                 <div className="space-y-2">
@@ -188,10 +188,10 @@ export default function RoadmapPage() {
                     return (
                       <button key={r} onClick={() => setSelectedRole(r)}
                         className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
-                          isSelected ? 'bg-indigo-500/8 border-indigo-500/25' : 'border-zinc-800 hover:border-zinc-700'
+                          isSelected ? 'bg-orange-500/8 border-orange-500/25' : 'border-zinc-800 hover:border-zinc-700'
                         }`}>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-700'
+                          isSelected ? 'border-orange-500 bg-orange-500' : 'border-zinc-700'
                         }`}>
                           {isSelected && <Check className="w-3 h-3 text-white" />}
                         </div>
@@ -206,7 +206,7 @@ export default function RoadmapPage() {
             {/* Step 2: Experience + Hours */}
             {wizStep === 2 && (
               <motion.div key="exp" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <p className="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-1">Step 3 of 4</p>
+                <p className="text-xs font-medium text-orange-400 uppercase tracking-wider mb-1">Step 3 of 4</p>
                 <h2 className="text-lg font-bold text-zinc-100 mb-1">Experience & Availability</h2>
                 <p className="text-sm text-zinc-500 mb-5">Help us calibrate difficulty and pace</p>
                 <div className="space-y-2 mb-6">
@@ -215,10 +215,10 @@ export default function RoadmapPage() {
                     return (
                       <button key={lvl.value} onClick={() => setSelectedExp(lvl.value)}
                         className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
-                          isSelected ? 'bg-indigo-500/8 border-indigo-500/25' : 'border-zinc-800 hover:border-zinc-700'
+                          isSelected ? 'bg-orange-500/8 border-orange-500/25' : 'border-zinc-800 hover:border-zinc-700'
                         }`}>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                          isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-700'
+                          isSelected ? 'border-orange-500 bg-orange-500' : 'border-zinc-700'
                         }`}>
                           {isSelected && <Check className="w-3 h-3 text-white" />}
                         </div>
@@ -231,9 +231,9 @@ export default function RoadmapPage() {
                   })}
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-zinc-300 mb-2 block">Daily study hours: <span className="text-indigo-400 font-bold">{dailyHours}h</span></label>
+                  <label className="text-sm font-medium text-zinc-300 mb-2 block">Daily study hours: <span className="text-orange-400 font-bold">{dailyHours}h</span></label>
                   <input type="range" min={1} max={8} value={dailyHours} onChange={(e) => setDailyHours(Number(e.target.value))}
-                    className="w-full accent-indigo-500" />
+                    className="w-full accent-orange-500" />
                   <div className="flex justify-between text-[11px] text-zinc-600 mt-1">
                     <span>1h</span><span>4h</span><span>8h</span>
                   </div>
@@ -244,7 +244,7 @@ export default function RoadmapPage() {
             {/* Step 3: Skills */}
             {wizStep === 3 && (
               <motion.div key="skills" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <p className="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-1">Step 4 of 4</p>
+                <p className="text-xs font-medium text-orange-400 uppercase tracking-wider mb-1">Step 4 of 4</p>
                 <h2 className="text-lg font-bold text-zinc-100 mb-1">Current Skills</h2>
                 <p className="text-sm text-zinc-500 mb-5">Select skills you already know (so AI can skip basics)</p>
                 <div className="flex flex-wrap gap-2">
@@ -254,7 +254,7 @@ export default function RoadmapPage() {
                       <button key={skill} onClick={() => toggleSkill(skill)}
                         className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all border ${
                           isSelected
-                            ? 'bg-indigo-500/12 text-indigo-400 border-indigo-500/25'
+                            ? 'bg-orange-500/12 text-orange-400 border-orange-500/25'
                             : 'text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
                         }`}>
                         {isSelected && <Check className="w-3.5 h-3.5 inline mr-1.5" />}
@@ -327,7 +327,7 @@ export default function RoadmapPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Total Tasks', value: tasks.length, color: 'text-indigo-400' },
+          { label: 'Total Tasks', value: tasks.length, color: 'text-orange-400' },
           { label: 'Completed', value: completedTasks, color: 'text-emerald-400' },
           { label: 'Progress', value: `${progress}%`, color: 'text-amber-400' },
         ].map(({ label, value, color }) => (
@@ -350,7 +350,7 @@ export default function RoadmapPage() {
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+              className="h-full bg-gradient-to-r from-orange-500 to-orange-500 rounded-full"
             />
           </div>
         </div>
@@ -366,7 +366,7 @@ export default function RoadmapPage() {
               onClick={() => setFilter(type)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                 filter === type
-                  ? 'bg-indigo-500/12 text-indigo-400 border border-indigo-500/25'
+                  ? 'bg-orange-500/12 text-orange-400 border border-orange-500/25'
                   : 'text-zinc-500 hover:text-zinc-300 border border-zinc-800 hover:border-zinc-700'
               }`}
             >
@@ -380,7 +380,7 @@ export default function RoadmapPage() {
       {loading && (
         <div className="flex items-center justify-center py-20">
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+            <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
             <p className="text-sm text-zinc-500">Generating your personalized roadmap with AI...</p>
           </div>
         </div>
@@ -429,7 +429,7 @@ export default function RoadmapPage() {
                   {task.completed ? (
                     <CheckCircle className="w-5 h-5 text-emerald-400" />
                   ) : (
-                    <Circle className="w-5 h-5 text-zinc-700 hover:text-indigo-400 transition-colors" />
+                    <Circle className="w-5 h-5 text-zinc-700 hover:text-orange-400 transition-colors" />
                   )}
                 </button>
                 <div className="flex-1 min-w-0">
@@ -457,7 +457,7 @@ export default function RoadmapPage() {
                       href={task.platformLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-indigo-400 hover:text-indigo-300 mt-1 inline-block"
+                      className="text-xs text-orange-400 hover:text-orange-300 mt-1 inline-block"
                     >
                       Open on {task.platform || 'Platform'} →
                     </a>

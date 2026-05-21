@@ -5,7 +5,7 @@ import useKanbanStore from '../store/useKanbanStore'
 
 const columns = [
   { id: 'backlog', label: 'Backlog', icon: Archive, color: 'text-zinc-500' },
-  { id: 'todo', label: 'To Do', icon: AlertCircle, color: 'text-indigo-400' },
+  { id: 'todo', label: 'To Do', icon: AlertCircle, color: 'text-orange-400' },
   { id: 'in-progress', label: 'In Progress', icon: Clock, color: 'text-amber-400' },
   { id: 'done', label: 'Done', icon: CheckCircle, color: 'text-emerald-400' },
 ]
@@ -97,7 +97,7 @@ export default function KanbanPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-h-[500px]">
@@ -157,7 +157,7 @@ export default function KanbanPage() {
                               href={task.platformLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-[11px] text-indigo-400 hover:text-indigo-300 mt-1.5 inline-block"
+                              className="text-[11px] text-orange-400 hover:text-orange-300 mt-1.5 inline-block"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {task.platform || 'Open'} →

@@ -8,19 +8,19 @@ import {
 import useCareerStore from '../store/useCareerStore'
 
 const tabs = [
-  { id: 'upload', label: 'Upload & Parse', icon: Upload, color: 'indigo' },
+  { id: 'upload', label: 'Upload & Parse', icon: Upload, color: 'orange' },
   { id: 'analyze', label: 'ATS Analysis', icon: Target, color: 'emerald' },
   { id: 'rephrase', label: 'Rephrase', icon: PenTool, color: 'amber' },
   { id: 'cover', label: 'Cover Letter', icon: Mail, color: 'cyan' },
-  { id: 'interview', label: 'Interview Prep', icon: HelpCircle, color: 'violet' },
+  { id: 'interview', label: 'Interview Prep', icon: HelpCircle, color: 'orange' },
 ]
 
 const colorMap = {
-  indigo: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', border: 'border-indigo-500/20', ring: 'ring-indigo-500/30' },
+  orange: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/20', ring: 'ring-orange-500/30' },
   emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/20', ring: 'ring-emerald-500/30' },
   amber: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20', ring: 'ring-amber-500/30' },
   cyan: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/20', ring: 'ring-cyan-500/30' },
-  violet: { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/20', ring: 'ring-violet-500/30' },
+  orange: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/20', ring: 'ring-orange-500/30' },
 }
 
 function MarkdownRenderer({ content }) {
@@ -65,7 +65,7 @@ function SliderControl({ label, value, onChange, min = 0, max = 1, step = 0.1 })
         <span className="text-xs text-zinc-500 font-mono">{value}</span>
       </div>
       <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 rounded-full appearance-none bg-zinc-800 accent-indigo-500 cursor-pointer" />
+        className="w-full h-1.5 rounded-full appearance-none bg-zinc-800 accent-orange-500 cursor-pointer" />
     </div>
   )
 }
@@ -195,7 +195,7 @@ export default function CareerPage() {
               onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
               onDragLeave={() => setDragOver(false)} onDrop={handleDrop}
               className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
-                dragOver ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-zinc-800 hover:border-zinc-700'
+                dragOver ? 'border-orange-500/50 bg-orange-500/5' : 'border-zinc-800 hover:border-zinc-700'
               }`}>
               <Upload className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
               <p className="text-sm text-zinc-300">{file ? file.name : 'Drop your resume or click to browse'}</p>
@@ -205,7 +205,7 @@ export default function CareerPage() {
 
             {file && (
               <div className="flex items-center gap-3 mt-3 p-3 rounded-xl bg-zinc-900 border border-zinc-800">
-                <FileText className="w-5 h-5 text-indigo-400" />
+                <FileText className="w-5 h-5 text-orange-400" />
                 <span className="text-sm text-zinc-300 flex-1 truncate">{file.name}</span>
                 <span className="text-xs text-zinc-600">{(file.size / 1024).toFixed(1)} KB</span>
                 <button onClick={() => setFile(null)} className="text-zinc-600 hover:text-zinc-400"><X className="w-4 h-4" /></button>
@@ -262,7 +262,7 @@ export default function CareerPage() {
 
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={withJD} onChange={(e) => setWithJD(e.target.checked)}
-                    className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-indigo-500 focus:ring-indigo-500/30" />
+                    className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-orange-500 focus:ring-orange-500/30" />
                   <span className="text-xs text-zinc-400">Analyze with Job Description</span>
                 </label>
 
@@ -378,8 +378,8 @@ export default function CareerPage() {
           <motion.div key="interview" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="space-y-4">
             <div className="card p-6">
               <div className="flex items-center gap-2 mb-4">
-                <div className={`w-8 h-8 rounded-xl ${colorMap.violet.bg} flex items-center justify-center`}>
-                  <HelpCircle className={`w-4 h-4 ${colorMap.violet.text}`} />
+                <div className={`w-8 h-8 rounded-xl ${colorMap.orange.bg} flex items-center justify-center`}>
+                  <HelpCircle className={`w-4 h-4 ${colorMap.orange.text}`} />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-sm font-semibold text-zinc-100">Interview Question Generator</h2>

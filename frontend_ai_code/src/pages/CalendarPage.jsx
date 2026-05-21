@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, ChevronLeft, ChevronRight, Clock, Plus, AlertCircle } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Clock, Plus, AlertCircle, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import useTaskStore from '../store/useTaskStore'
 
@@ -157,7 +157,7 @@ export default function CalendarPage() {
                     {date.getDate()}
                   </span>
                   {isOverloaded && isCurrentMonth && (
-                    <span title="Overloaded day" style={{ fontSize: 10, color: '#fbbf24' }}>⚠</span>
+                    <AlertTriangle className="w-3 h-3" style={{ color: '#fbbf24' }} />
                   )}
                 </div>
                 <div className="space-y-0.5 overflow-hidden">

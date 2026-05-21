@@ -55,7 +55,7 @@ export default function InterviewPage() {
           animate={{ opacity: 1, y: 0 }}
           className="card p-6 max-w-2xl"
         >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center mb-5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center mb-5">
             <Code2 className="w-6 h-6 text-white" />
           </div>
           <h2 className="text-lg font-semibold text-zinc-100 mb-1">Ready to practice?</h2>
@@ -70,7 +70,7 @@ export default function InterviewPage() {
                   onClick={() => setTopic(t)}
                   className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
                     topic === t
-                      ? 'bg-indigo-500/12 border-indigo-500/25 text-indigo-400'
+                      ? 'bg-orange-500/12 border-orange-500/25 text-orange-400'
                       : 'border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
                   }`}
                 >
@@ -108,7 +108,7 @@ export default function InterviewPage() {
           {/* Progress */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-zinc-400">
-              <Code2 className="w-4 h-4 text-indigo-400" />
+              <Code2 className="w-4 h-4 text-orange-400" />
               Question {currentIndex + 1} of {questions.length}
             </div>
             <div className={`flex items-center gap-1.5 text-sm font-medium ${
@@ -123,7 +123,7 @@ export default function InterviewPage() {
           <div className="w-full h-1 bg-zinc-800 rounded-full overflow-hidden">
             <motion.div
               animate={{ width: `${progressPct}%` }}
-              className="h-full bg-indigo-500 rounded-full"
+              className="h-full bg-orange-500 rounded-full"
             />
           </div>
 
@@ -172,7 +172,7 @@ export default function InterviewPage() {
 
           {/* Score display */}
           <div className="my-6">
-            <p className="text-5xl font-bold text-indigo-400 mb-1">{result.score}%</p>
+            <p className="text-5xl font-bold text-orange-400 mb-1">{result.score}%</p>
             <p className="text-sm text-zinc-500">Overall Score</p>
           </div>
 

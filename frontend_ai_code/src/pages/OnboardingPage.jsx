@@ -94,12 +94,12 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: '#09090b' }}>
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px]" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-[120px]" />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative w-full max-w-lg">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center">
             <Target className="w-4 h-4 text-white" />
           </div>
           <span className="font-semibold text-zinc-100 text-[15px]">FinishIt</span>
@@ -111,7 +111,7 @@ export default function OnboardingPage() {
             <div
               key={i}
               className={`h-1 rounded-full transition-all duration-300 ${
-                i === step ? 'w-10 bg-indigo-500' : i < step ? 'w-6 bg-indigo-500/40' : 'w-6 bg-zinc-800'
+                i === step ? 'w-10 bg-orange-500' : i < step ? 'w-6 bg-orange-500/40' : 'w-6 bg-zinc-800'
               }`}
             />
           ))}
@@ -128,7 +128,7 @@ export default function OnboardingPage() {
               transition={{ duration: 0.2 }}
             >
               <div className="mb-6">
-                <p className="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-1">
+                <p className="text-xs font-medium text-orange-400 uppercase tracking-wider mb-1">
                   Step {step + 1} of {steps.length}
                 </p>
                 <h2 className="text-xl font-bold text-zinc-100">{currentStep.title}</h2>
@@ -146,12 +146,12 @@ export default function OnboardingPage() {
                       onClick={() => selectOption(opt.value)}
                       className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left ${
                         isSelected
-                          ? 'bg-indigo-500/8 border-indigo-500/25'
+                          ? 'bg-orange-500/8 border-orange-500/25'
                           : 'border-zinc-800 hover:border-zinc-700 bg-zinc-900/50'
                       }`}
                     >
                       <div className={`w-5 h-5 rounded-${currentStep.multi ? 'md' : 'full'} border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        isSelected ? 'border-indigo-500 bg-indigo-500' : 'border-zinc-700'
+                        isSelected ? 'border-orange-500 bg-orange-500' : 'border-zinc-700'
                       }`}>
                         {isSelected && <Check className="w-3 h-3 text-white" />}
                       </div>

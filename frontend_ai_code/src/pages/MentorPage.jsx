@@ -27,7 +27,7 @@ function formatMessage(content) {
 }
 
 const modes = [
-  { id: 'general', label: 'General', icon: MessageCircle, desc: 'Ask anything', color: 'from-indigo-500 to-violet-500' },
+  { id: 'general', label: 'General', icon: MessageCircle, desc: 'Ask anything', color: 'from-orange-500 to-orange-500' },
   { id: 'dsa', label: 'DSA Help', icon: Code2, desc: 'Data structures & algorithms', color: 'from-emerald-500 to-teal-500' },
   { id: 'interview', label: 'Interview Prep', icon: Briefcase, desc: 'Mock questions & feedback', color: 'from-amber-500 to-orange-500' },
   { id: 'code-review', label: 'Code Review', icon: BookOpen, desc: 'Debug & optimize code', color: 'from-rose-500 to-pink-500' },
@@ -85,7 +85,7 @@ export default function MentorPage() {
               onClick={() => setMode(m.id)}
               className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all border ${
                 isActive
-                  ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
+                  ? 'bg-orange-500/10 text-orange-400 border-orange-500/25'
                   : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
               }`}
             >
@@ -136,7 +136,7 @@ export default function MentorPage() {
                 <div
                   className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 ${
                     msg.role === 'user'
-                      ? 'bg-indigo-500 text-white rounded-br-md'
+                      ? 'bg-orange-500 text-white rounded-br-md'
                       : 'bg-zinc-800/80 text-zinc-200 rounded-bl-md'
                   }`}
                 >

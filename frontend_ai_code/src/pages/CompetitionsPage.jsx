@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Swords, ExternalLink, Bell, BellOff, Filter, Loader2, Clock, Zap } from 'lucide-react'
+import { Swords, ExternalLink, Bell, BellOff, Filter, Loader2, Clock, Zap, Trophy, Code, Terminal, Cpu, Box, Hexagon, Circle } from 'lucide-react'
 import useCompetitionStore from '../store/useCompetitionStore'
 
 const platformColors = {
   codeforces: 'from-blue-500 to-cyan-500',
   leetcode: 'from-amber-500 to-yellow-500',
   codechef: 'from-emerald-500 to-green-500',
-  techgig: 'from-violet-500 to-purple-500',
+  techgig: 'from-orange-500 to-orange-500',
   hackerrank: 'from-green-500 to-emerald-500',
-  hackerearth: 'from-indigo-500 to-blue-500',
+  hackerearth: 'from-orange-500 to-blue-500',
   other: 'from-zinc-500 to-zinc-600',
 }
 
 const platformLogos = {
-  codeforces: '🔵', leetcode: '🟡', codechef: '🟢', techgig: '🟣',
-  hackerrank: '💚', hackerearth: '🔷', other: '⚪',
+  codeforces: <Terminal className="w-5 h-5 text-white" />, leetcode: <Code className="w-5 h-5 text-white" />, codechef: <Box className="w-5 h-5 text-white" />, techgig: <Cpu className="w-5 h-5 text-white" />,
+  hackerrank: <Hexagon className="w-5 h-5 text-white" />, hackerearth: <Trophy className="w-5 h-5 text-white" />, other: <Circle className="w-5 h-5 text-white" />,
 }
 
 function getStatusBadge(comp) {
@@ -49,7 +49,7 @@ export default function CompetitionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-100 tracking-tight flex items-center gap-2">
-            <Swords className="w-6 h-6 text-indigo-400" /> Competitions
+            <Swords className="w-6 h-6 text-orange-400" /> Competitions
           </h1>
           <p className="text-sm text-zinc-500 mt-1">Discover and track coding contests across platforms</p>
         </div>
@@ -67,7 +67,7 @@ export default function CompetitionsPage() {
           onClick={() => setStatusFilter('ongoing')}
           className={`btn btn-sm ${statusFilter === 'ongoing' ? 'btn-primary' : 'btn-secondary'}`}
         >
-          🔴 Live
+          Live
         </button>
         <button
           onClick={() => setStatusFilter('')}
@@ -98,7 +98,7 @@ export default function CompetitionsPage() {
       {/* Competition Cards */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
         </div>
       ) : competitions.length === 0 ? (
         <div className="text-center py-20">
@@ -122,12 +122,12 @@ export default function CompetitionsPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-lg flex-shrink-0`}>
-                    {platformLogos[comp.platform] || '⚪'}
+                    {platformLogos[comp.platform] || <Circle className="w-5 h-5 text-white" />}
                   </div>
                   <span className={`badge text-[10px] ${cls}`}>{label}</span>
                 </div>
 
-                <h3 className="text-sm font-semibold text-zinc-100 mb-1 line-clamp-2 group-hover:text-indigo-300 transition-colors">
+                <h3 className="text-sm font-semibold text-zinc-100 mb-1 line-clamp-2 group-hover:text-orange-300 transition-colors">
                   {comp.title}
                 </h3>
 

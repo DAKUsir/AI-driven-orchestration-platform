@@ -57,7 +57,7 @@ export default function AnalyticsPage() {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {[
-          { icon: Code2, label: 'Total Solved', value: stats.totalSolved || 0, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+          { icon: Code2, label: 'Total Solved', value: stats.totalSolved || 0, color: 'text-orange-400', bg: 'bg-orange-500/10' },
           { icon: Trophy, label: 'Points', value: stats.points || 0, color: 'text-amber-400', bg: 'bg-amber-500/10' },
           { icon: Flame, label: 'Streak', value: `${stats.streak || 0}d`, color: 'text-orange-400', bg: 'bg-orange-500/10' },
           { icon: Target, label: 'Tasks Done', value: `${stats.completedTasks || 0}/${stats.totalTasks || 0}`, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
@@ -88,7 +88,7 @@ export default function AnalyticsPage() {
           className="card p-5"
         >
           <div className="flex items-center gap-2 mb-4">
-            <Target className="w-4 h-4 text-indigo-400" />
+            <Target className="w-4 h-4 text-orange-400" />
             <h2 className="text-sm font-semibold text-zinc-100">Skills Radar</h2>
           </div>
           {radarData.length > 0 ? (

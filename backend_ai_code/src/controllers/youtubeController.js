@@ -30,7 +30,7 @@ const youtubeCallback = async (req, res) => {
 
     if (!code) {
       return res.redirect(
-        `${process.env.FRONTEND_URL}/integrations?error=no_code`
+        `${process.env.FRONTEND_URL || 'http://localhost:5173'}/integrations?error=no_code`
       );
     }
 
@@ -41,7 +41,7 @@ const youtubeCallback = async (req, res) => {
       userId = decoded.id;
     } catch {
       return res.redirect(
-        `${process.env.FRONTEND_URL}/integrations?error=invalid_state`
+        `${process.env.FRONTEND_URL || 'http://localhost:5173'}/integrations?error=invalid_state`
       );
     }
 
@@ -72,12 +72,12 @@ const youtubeCallback = async (req, res) => {
     );
 
     res.redirect(
-      `${process.env.FRONTEND_URL}/integrations?youtube=connected`
+      `${process.env.FRONTEND_URL || 'http://localhost:5173'}/integrations?youtube=connected`
     );
   } catch (error) {
     console.error("[YouTube Callback]", error.message);
     res.redirect(
-      `${process.env.FRONTEND_URL}/integrations?error=${encodeURIComponent(error.message)}`
+      `${process.env.FRONTEND_URL || 'http://localhost:5173'}/integrations?error=${encodeURIComponent(error.message)}`
     );
   }
 };

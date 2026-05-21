@@ -12,7 +12,7 @@ const features = [
     icon: CheckSquare,
     title: 'Smart Task Planner',
     desc: 'Capture tasks from YouTube, Coursera, LeetCode, GitHub, GFG & Kaggle in one place.',
-    color: 'from-indigo-500 to-violet-500',
+    color: 'from-orange-500 to-orange-500',
   },
   {
     icon: Calendar,
@@ -42,7 +42,7 @@ const features = [
     icon: Users,
     title: 'Study Groups',
     desc: 'Real-time group chat for study accountability. Track peer progress together.',
-    color: 'from-violet-500 to-purple-500',
+    color: 'from-orange-500 to-orange-500',
   },
   {
     icon: Trophy,
@@ -95,7 +95,7 @@ export default function LandingPage() {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center">
               <Target className="w-4 h-4 text-white" />
             </div>
             <span className="font-semibold text-zinc-100 text-[15px]">FinishIt</span>
@@ -113,14 +113,14 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="relative pt-32 pb-20 lg:pt-44 lg:pb-32 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-500/8 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-violet-500/5 rounded-full blur-[100px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-orange-500/8 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-orange-500/5 rounded-full blur-[100px]" />
 
         <div className="relative max-w-7xl mx-auto px-5">
           <div className="max-w-3xl mx-auto text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 text-xs text-zinc-400 mb-8">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <Sparkles className="w-3.5 h-3.5 text-orange-400" />
                 AI-Powered Task Orchestration
               </div>
             </motion.div>
@@ -188,7 +188,7 @@ export default function LandingPage() {
       <section className="py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-5">
           <div className="text-center mb-16">
-            <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-3">
+            <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-xs font-medium text-orange-400 uppercase tracking-wider mb-3">
               Features
             </motion.p>
             <motion.h2 initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-3xl lg:text-4xl font-bold text-zinc-100 tracking-tight">
@@ -223,7 +223,7 @@ export default function LandingPage() {
       <section className="py-20 lg:py-28 border-t border-zinc-800/60">
         <div className="max-w-7xl mx-auto px-5">
           <div className="text-center mb-16">
-            <p className="text-xs font-medium text-indigo-400 uppercase tracking-wider mb-3">How It Works</p>
+            <p className="text-xs font-medium text-orange-400 uppercase tracking-wider mb-3">How It Works</p>
             <h2 className="text-3xl lg:text-4xl font-bold text-zinc-100 tracking-tight">
               Three steps to getting things done
             </h2>
@@ -273,7 +273,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center">
                 <Target className="w-3.5 h-3.5 text-white" />
               </div>
               <span className="font-semibold text-zinc-400 text-sm">FinishIt</span>

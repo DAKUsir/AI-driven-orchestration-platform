@@ -25,7 +25,7 @@ export default function YoutubeCoursePage() {
   if (loading || !courseDetail) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+        <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
       </div>
     )
   }
@@ -75,7 +75,7 @@ export default function YoutubeCoursePage() {
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Videos</p>
         </div>
         <div className="card p-4 text-center">
-          <p className={`text-xl font-bold ${progress === 100 ? 'text-emerald-400' : 'text-indigo-400'}`}>{progress}%</p>
+          <p className={`text-xl font-bold ${progress === 100 ? 'text-emerald-400' : 'text-orange-400'}`}>{progress}%</p>
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Progress</p>
         </div>
         <div className="card p-4 text-center">
@@ -83,7 +83,7 @@ export default function YoutubeCoursePage() {
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Remaining</p>
         </div>
         <div className="card p-4 text-center">
-          <p className="text-xl font-bold text-violet-400">{formatTime(totalSec)}</p>
+          <p className="text-xl font-bold text-orange-400">{formatTime(totalSec)}</p>
           <p className="text-[10px] text-zinc-500 uppercase tracking-wider mt-0.5">Total</p>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function YoutubeCoursePage() {
           onClick={() => setTaskModal(false)}>
           <div className="card p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-zinc-100 mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-indigo-400" /> Generate Study Plan
+              <Calendar className="w-5 h-5 text-orange-400" /> Generate Study Plan
             </h3>
             {taskResult ? (
               <div className="space-y-3">

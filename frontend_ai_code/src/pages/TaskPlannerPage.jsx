@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, X, CheckCircle, Clock, AlertCircle, Archive,
-  Loader2, ExternalLink, Search, Sparkles, Wand2
+  Loader2, ExternalLink, Search, Sparkles, Wand2, PartyPopper
 } from 'lucide-react'
 import useTaskStore from '../store/useTaskStore'
 
@@ -14,14 +14,14 @@ const columns = [
 ]
 
 const categoryOptions = [
-  { value: 'youtube',        label: '🎬 YouTube' },
-  { value: 'coursera',       label: '📚 Coursera' },
-  { value: 'github',         label: '🐙 GitHub' },
-  { value: 'leetcode',       label: '💻 LeetCode' },
-  { value: 'gfg',            label: '📗 GFG' },
-  { value: 'kaggle',         label: '📊 Kaggle' },
-  { value: 'interview-prep', label: '🎯 Interview Prep' },
-  { value: 'other',          label: '📝 Other' },
+  { value: 'youtube',        label: 'YouTube' },
+  { value: 'coursera',       label: 'Coursera' },
+  { value: 'github',         label: 'GitHub' },
+  { value: 'leetcode',       label: 'LeetCode' },
+  { value: 'gfg',            label: 'GFG' },
+  { value: 'kaggle',         label: 'Kaggle' },
+  { value: 'interview-prep', label: 'Interview Prep' },
+  { value: 'other',          label: 'Other' },
 ]
 
 const priorityColors = {
@@ -211,7 +211,7 @@ export default function TaskPlannerPage() {
                       )}
                       <div className="flex flex-wrap gap-1 mt-2">
                         <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                          {categoryOptions.find(c => c.value === task.category)?.label || '📝 Other'}
+                          {categoryOptions.find(c => c.value === task.category)?.label || 'Other'}
                         </span>
                         {task.priority && (
                           <span className={`badge text-[10px] ${priorityColors[task.priority]}`}>{task.priority}</span>
@@ -408,7 +408,7 @@ export default function TaskPlannerPage() {
                     className="p-4 rounded-xl text-center"
                     style={{ background: 'var(--success-muted)', border: '1px solid rgba(34,197,94,0.2)' }}
                   >
-                    <div className="text-3xl mb-2">🎉</div>
+                    <div className="mb-2 flex justify-center text-emerald-400"><PartyPopper className="w-10 h-10" /></div>
                     <p className="text-sm font-semibold" style={{ color: 'var(--success)' }}>
                       {aiResult} tasks created!
                     </p>

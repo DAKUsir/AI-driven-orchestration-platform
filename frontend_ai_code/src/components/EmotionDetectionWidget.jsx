@@ -53,12 +53,12 @@ export default function EmotionDetectionWidget({ enabled = false, onToggle }) {
     <div className="card p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Camera className="w-4 h-4 text-indigo-400" />
+          <Camera className="w-4 h-4 text-orange-400" />
           <span className="text-xs font-medium text-zinc-300">Confidence Tracker</span>
         </div>
         <button
           onClick={handleToggle}
-          className={`btn btn-sm btn-icon ${active ? 'bg-indigo-500/12 text-indigo-400' : 'btn-ghost'}`}
+          className={`btn btn-sm btn-icon ${active ? 'bg-orange-500/12 text-orange-400' : 'btn-ghost'}`}
         >
           {active ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>

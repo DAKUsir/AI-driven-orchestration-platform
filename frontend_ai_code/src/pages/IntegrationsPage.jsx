@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Code2, BookOpen, GitBranch, RefreshCw, CheckCircle, Plus, X, Trash2,
   ExternalLink, Loader2, Star, GitFork, FolderKanban, AlertCircle, Zap,
-  PlayCircle, Unplug,
+  PlayCircle, Unplug, Video,
 } from 'lucide-react'
 import useIntegrationStore from '../store/useIntegrationStore'
 import useYoutubeStore from '../store/useYoutubeStore'
@@ -32,7 +32,7 @@ const platformConfig = {
 
 const categoryColors = {
   'Web Dev': 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  'AI/ML': 'bg-purple-500/15 text-purple-400 border-purple-500/20',
+  'AI/ML': 'bg-orange-500/15 text-orange-400 border-orange-500/20',
   'Mobile': 'bg-pink-500/15 text-pink-400 border-pink-500/20',
   'DevOps': 'bg-orange-500/15 text-orange-400 border-orange-500/20',
   'Data Science': 'bg-cyan-500/15 text-cyan-400 border-cyan-500/20',
@@ -179,7 +179,7 @@ export default function IntegrationsPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden">
           <div className="p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center flex-shrink-0 text-xl">
-              🎬
+              <Video className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
@@ -218,7 +218,7 @@ export default function IntegrationsPage() {
           {yt.connected && (
             <div className="border-t border-zinc-800/60 px-5 py-3 flex items-center gap-4 text-xs text-zinc-500">
               <span>Last synced: {yt.lastSynced ? new Date(yt.lastSynced).toLocaleString() : 'Never'}</span>
-              <Link to="/youtube" className="text-indigo-400 hover:text-indigo-300 ml-auto flex items-center gap-1">
+              <Link to="/youtube" className="text-orange-400 hover:text-orange-300 ml-auto flex items-center gap-1">
                 View courses <ExternalLink className="w-3 h-3" />
               </Link>
             </div>
@@ -331,7 +331,7 @@ export default function IntegrationsPage() {
                         <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Hard</p>
                       </div>
                       <div className="text-center p-2.5 rounded-lg bg-zinc-900/50">
-                        <p className="text-lg font-bold text-indigo-400">
+                        <p className="text-lg font-bold text-orange-400">
                           {(profile.easySolved * 2) + (profile.mediumSolved * 5) + (profile.hardSolved * 10)}
                         </p>
                         <p className="text-[10px] text-zinc-500 uppercase tracking-wider flex items-center justify-center gap-0.5">
@@ -426,7 +426,7 @@ export default function IntegrationsPage() {
                     <div className="flex items-center gap-3 text-xs text-zinc-500">
                       {project.language && (
                         <span className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-indigo-400" />
+                          <span className="w-2 h-2 rounded-full bg-orange-400" />
                           {project.language}
                         </span>
                       )}
@@ -500,7 +500,7 @@ export default function IntegrationsPage() {
                         onClick={() => setProjectPlatform(p)}
                         className={`flex-1 p-3 rounded-xl border transition-all text-sm font-medium ${
                           projectPlatform === p
-                            ? 'bg-indigo-500/8 border-indigo-500/25 text-indigo-400'
+                            ? 'bg-orange-500/8 border-orange-500/25 text-orange-400'
                             : 'border-zinc-800 text-zinc-400 hover:border-zinc-700'
                         }`}
                       >

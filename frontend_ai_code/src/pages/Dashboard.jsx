@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CheckCircle, Flame, Trophy, TrendingUp, ArrowRight, Clock, AlertTriangle, Calendar, Plus, Target } from 'lucide-react'
+import { CheckCircle, Flame, Trophy, TrendingUp, ArrowRight, Clock, AlertTriangle, Calendar, Plus, Target, Video, BookOpen, Terminal, Code2, Book, BarChart, FileText, PartyPopper } from 'lucide-react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import StatCard from '../components/StatCard'
@@ -9,8 +9,8 @@ import useStreakStore from '../store/useStreakStore'
 import useLeaderboardStore from '../store/useLeaderboardStore'
 
 const categoryIcons = {
-  youtube: '🎬', coursera: '📚', github: '🐙', leetcode: '💻',
-  gfg: '📗', kaggle: '📊', 'interview-prep': '🎯', other: '📝',
+  youtube: <Video className="w-4 h-4" />, coursera: <BookOpen className="w-4 h-4" />, github: <Terminal className="w-4 h-4" />, leetcode: <Code2 className="w-4 h-4" />,
+  gfg: <Book className="w-4 h-4" />, kaggle: <BarChart className="w-4 h-4" />, 'interview-prep': <Target className="w-4 h-4" />, other: <FileText className="w-4 h-4" />,
 }
 
 export default function Dashboard() {
@@ -33,14 +33,14 @@ export default function Dashboard() {
   const carriedTasks = dailyTasks.filter(t => t.isCarryForward)
 
   const stats = [
-    { icon: Flame,      label: 'Current Streak',  value: `${currentStreak} 🔥`, color: 'amber',   delay: 0 },
+    { icon: Flame,      label: 'Current Streak',  value: `${currentStreak}`, color: 'amber',   delay: 0 },
     { icon: CheckCircle,label: "Today's Progress", value: `${doneTasks}/${totalToday}`, color: 'green', delay: 0.05 },
     { icon: Trophy,     label: 'Total Points',    value: user?.points || 0,          color: 'primary', delay: 0.1 },
     { icon: TrendingUp, label: 'Longest Streak',  value: `${longestStreak} days`,    color: 'accent',  delay: 0.15 },
   ]
 
   const quickActions = [
-    { label: 'Add Task',       desc: 'Capture a new learning task',   icon: Plus,     to: '/planner',      color: 'from-indigo-500 to-violet-500' },
+    { label: 'Add Task',       desc: 'Capture a new learning task',   icon: Plus,     to: '/planner',      color: 'from-orange-500 to-orange-500' },
     { label: 'View Calendar',  desc: 'See your weekly schedule',       icon: Calendar, to: '/calendar',     color: 'from-cyan-500 to-blue-500' },
     { label: 'Competitions',   desc: 'Check upcoming contests',        icon: Target,   to: '/competitions', color: 'from-amber-500 to-orange-500' },
   ]
@@ -122,7 +122,7 @@ export default function Dashboard() {
           <div className="space-y-1">
             {pendingTasks.length === 0 && doneTasks === totalToday && totalToday > 0 ? (
               <div className="py-8 text-center">
-                <div className="text-4xl mb-2">🎉</div>
+                <div className="mb-2 flex justify-center text-emerald-400"><PartyPopper className="w-10 h-10" /></div>
                 <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>All done for today! Great work.</p>
               </div>
             ) : dailyTasks.length === 0 ? (
@@ -152,7 +152,7 @@ export default function Dashboard() {
                   >
                     {task.status === 'done' && <CheckCircle className="w-3 h-3 text-white" />}
                   </div>
-                  <span className="text-sm mr-1">{categoryIcons[task.category] || '📝'}</span>
+                  <span className="text-sm mr-1">{categoryIcons[task.category] || <FileText className="w-4 h-4" />}</span>
                   <span
                     className="text-sm flex-1 truncate"
                     style={{

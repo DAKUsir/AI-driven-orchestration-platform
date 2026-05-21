@@ -5,7 +5,7 @@ import {
   PlayCircle, RefreshCw, Loader2, ExternalLink, Trash2,
   Clock, CheckCircle, Filter, ChevronDown, ChevronUp,
   Calendar, ListTodo, AlertCircle, X, BarChart3,
-  Plus, LinkIcon, Sparkles, Wand2, Search,
+  Plus, LinkIcon, Sparkles, Wand2, Search, Video
 } from 'lucide-react'
 import useYoutubeStore from '../store/useYoutubeStore'
 import api from '../utils/api'
@@ -21,7 +21,7 @@ const categoryColors = {
   'web-dev': 'bg-blue-500/15 text-blue-400',
   python: 'bg-emerald-500/15 text-emerald-400',
   java: 'bg-orange-500/15 text-orange-400',
-  'ml-ai': 'bg-purple-500/15 text-purple-400',
+  'ml-ai': 'bg-orange-500/15 text-orange-400',
   devops: 'bg-rose-500/15 text-rose-400',
   mobile: 'bg-pink-500/15 text-pink-400',
   database: 'bg-cyan-500/15 text-cyan-400',
@@ -49,7 +49,7 @@ function timeSince(date) {
   return d.toLocaleDateString()
 }
 
-export default function YoutubeDashboard() {
+export default function VideoDashboard() {
   const {
     connected, channelTitle, lastSynced, courses, loading, syncing,
     generatingTasks, addingPlaylist, error,
@@ -167,7 +167,7 @@ export default function YoutubeDashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-            <span className="text-2xl">🎬</span> YouTube Dashboard
+            <Video className="w-8 h-8 text-red-500" /> YouTube Dashboard
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
             {connected ? (
@@ -330,8 +330,8 @@ export default function YoutubeDashboard() {
             { label: 'Total', value: totalCourses, color: 'text-zinc-100' },
             { label: 'In Progress', value: inProgress, color: 'text-amber-400' },
             { label: 'Completed', value: completed, color: 'text-emerald-400' },
-            { label: 'Total Hours', value: `${Math.round(totalHours)}h`, color: 'text-indigo-400' },
-            { label: 'Avg Progress', value: `${avgProgress}%`, color: 'text-violet-400' },
+            { label: 'Total Hours', value: `${Math.round(totalHours)}h`, color: 'text-orange-400' },
+            { label: 'Avg Progress', value: `${avgProgress}%`, color: 'text-orange-400' },
           ].map(({ label, value, color }) => (
             <motion.div key={label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
               className="card p-4 text-center">
@@ -370,7 +370,7 @@ export default function YoutubeDashboard() {
       {/* Course Cards */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
         </div>
       ) : courses.length === 0 ? (
         <div className="text-center py-20">
@@ -414,7 +414,7 @@ export default function YoutubeDashboard() {
 
                 <div className="p-4 flex-1 flex flex-col">
                   {/* Title */}
-                  <h3 className="text-sm font-semibold text-zinc-100 mb-1 line-clamp-2 group-hover:text-indigo-300 transition-colors">
+                  <h3 className="text-sm font-semibold text-zinc-100 mb-1 line-clamp-2 group-hover:text-orange-300 transition-colors">
                     {course.title}
                   </h3>
                   {course.channelTitle && (
@@ -561,7 +561,7 @@ export default function YoutubeDashboard() {
               onClick={(e) => e.stopPropagation()}
               className="card p-6 w-full max-w-sm">
               <h3 className="text-lg font-semibold text-zinc-100 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-indigo-400" /> Generate Study Plan
+                <Calendar className="w-5 h-5 text-orange-400" /> Generate Study Plan
               </h3>
 
               {taskResult ? (

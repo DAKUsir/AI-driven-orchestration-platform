@@ -6,7 +6,7 @@ export default function LoadingSpinner({ fullScreen = true }) {
     <div className="flex flex-col items-center justify-center gap-4">
       <div className="relative">
         <motion.div
-          className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center"
+          className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center"
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
         >

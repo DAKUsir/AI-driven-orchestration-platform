@@ -12,11 +12,11 @@ const tagColors = {
 }
 
 const tagLabels = {
-  beginner: '🌱 Beginner',
-  revision: '🔁 Revision',
-  'interview-ready': '🎯 Interview Ready',
-  mixed: '🎨 Mixed',
-  'company-specific': '🏢 Company Specific',
+  beginner: 'Beginner',
+  revision: 'Revision',
+  'interview-ready': 'Interview Ready',
+  mixed: 'Mixed',
+  'company-specific': 'Company Specific',
 }
 
 export default function DSASheetsPage() {

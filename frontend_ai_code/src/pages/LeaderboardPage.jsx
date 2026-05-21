@@ -62,7 +62,7 @@ export default function LeaderboardPage() {
           onClick={() => setActiveTab('global')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
             activeTab === 'global'
-              ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
+              ? 'bg-orange-500/10 text-orange-400 border-orange-500/25'
               : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
           }`}
         >
@@ -73,7 +73,7 @@ export default function LeaderboardPage() {
           onClick={() => setActiveTab('group')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
             activeTab === 'group'
-              ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25'
+              ? 'bg-orange-500/10 text-orange-400 border-orange-500/25'
               : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
           }`}
         >
@@ -97,7 +97,7 @@ export default function LeaderboardPage() {
               }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border ${
                 selectedGroupId === g._id
-                  ? 'bg-indigo-500/12 text-indigo-400 border-indigo-500/25'
+                  ? 'bg-orange-500/12 text-orange-400 border-orange-500/25'
                   : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
               }`}
             >
@@ -112,9 +112,9 @@ export default function LeaderboardPage() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="card p-5 flex items-center gap-4 border-indigo-500/15"
+          className="card p-5 flex items-center gap-4 border-orange-500/15"
         >
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-lg font-bold text-white">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center text-lg font-bold text-white">
             #{myRank.rank}
           </div>
           <div>
@@ -156,7 +156,7 @@ export default function LeaderboardPage() {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
         </div>
       )}
 
@@ -172,12 +172,12 @@ export default function LeaderboardPage() {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.02 }}
-                className={`card p-4 flex items-center gap-4 ${isYou ? 'border-indigo-500/20' : ''}`}
+                className={`card p-4 flex items-center gap-4 ${isYou ? 'border-orange-500/20' : ''}`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(rank - 1).bg}`}>
                   {rank}
                 </div>
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
                   {entry.name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">

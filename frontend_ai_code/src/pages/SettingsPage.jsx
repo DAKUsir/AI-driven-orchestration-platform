@@ -81,7 +81,7 @@ export default function SettingsPage() {
         className="card p-6"
       >
         <div className="flex items-center gap-2 mb-5">
-          <User className="w-4 h-4 text-indigo-400" />
+          <User className="w-4 h-4 text-orange-400" />
           <h2 className="text-sm font-semibold text-zinc-100">Profile</h2>
         </div>
 
@@ -114,7 +114,7 @@ export default function SettingsPage() {
         className="card p-6"
       >
         <div className="flex items-center gap-2 mb-5">
-          <GraduationCap className="w-4 h-4 text-violet-400" />
+          <GraduationCap className="w-4 h-4 text-orange-400" />
           <h2 className="text-sm font-semibold text-zinc-100">Academic Details</h2>
         </div>
 
