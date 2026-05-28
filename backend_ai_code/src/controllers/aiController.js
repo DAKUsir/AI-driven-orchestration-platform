@@ -55,15 +55,22 @@ const handleChat = async (req, res) => {
 // @access  Private
 const generateTasks = async (req, res) => {
   try {
-    const { goal, category = "other", count = 5, daysFromNow = 7 } = req.body;
+    const { goal, category = "other", count = 5, deadline } = req.body;
     if (!goal) return res.status(400).json({ message: "Goal is required" });
 
     const today = new Date();
-    const prompt = `You are a study task generator. The user wants to: "${goal}"
+    const targetDateStr = deadline || new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+    const todayStr = today.toISOString().split("T")[0];
+
+    const prompt = `You are an expert study task generator. The user wants to learn or accomplish: "${goal}"
 Category: ${category}
+
 Generate exactly ${count} specific, actionable learning tasks for this goal.
 
-Return ONLY valid JSON array (no markdown, no explanation):
+CRITICAL INSTRUCTION FOR DUE DATES:
+You MUST balance and evenly distribute the 'dueDate' for these tasks precisely between today (${todayStr}) and the target deadline (${targetDateStr}). Do NOT assign random dates outside this range, and do NOT stack all tasks on a single day. Make the progression logical and sequential.
+
+Return ONLY a valid JSON array (no markdown block wrapping, no explanation text):
 [
   {
     "title": "Task title (specific and actionable)",
@@ -77,7 +84,6 @@ Return ONLY valid JSON array (no markdown, no explanation):
   }
 ]
 
-Spread due dates from today (${today.toISOString().split("T")[0]}) across the next ${daysFromNow} days.
 Priority must be one of: low, medium, high, urgent.
 Difficulty must be one of: easy, medium, hard.
 estimatedMinutes between 15 and 180.`;
