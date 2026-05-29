@@ -34,13 +34,29 @@ const youtubeRoutes = require("./routes/youtubeRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const GroupChat = require("./models/GroupChat");
+const GlobalMessage = require("./models/GlobalMessage");
 const User = require("./models/User");
 const { setIO } = require("./utils/ioSingleton");
 
 
 
 // Connect to database
-connectDB();
+connectDB().then(() => {
+  // Initialize cache on global object
+  global.globalMessagesCache = [];
+  GlobalMessage.find({})
+    .sort({ timestamp: -1 })
+    .limit(100)
+    .populate("sender", "name email avatar emojiAvatar")
+    .lean()
+    .then((messages) => {
+      global.globalMessagesCache = messages.reverse();
+      console.log(`[Cache] Loaded ${global.globalMessagesCache.length} global messages into memory.`);
+    })
+    .catch((err) => {
+      console.error("[Cache] Failed to load global messages:", err.message);
+    });
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -130,11 +146,14 @@ io.on("connection", async (socket) => {
   const userId = socket.userId;
 
   try {
-    const user = await User.findById(userId).select("name email avatar");
+    const user = await User.findById(userId).select("name email avatar emojiAvatar");
     if (user) {
       onlineUsers.set(socket.id, {
         userId: user._id.toString(),
         userName: user.name,
+        email: user.email,
+        avatar: user.avatar,
+        emojiAvatar: user.emojiAvatar || "😀",
       });
     }
   } catch (e) {
@@ -220,6 +239,83 @@ io.on("connection", async (socket) => {
     }
   });
 
+  // ── Global Chat Events ──
+  socket.on("join-global", () => {
+    socket.join("global-chat");
+    // Broadcast updated online count
+    const globalCount = io.sockets.adapter.rooms.get("global-chat")?.size || 0;
+    io.to("global-chat").emit("global-online-count", globalCount);
+  });
+
+  socket.on("leave-global", () => {
+    socket.leave("global-chat");
+    const globalCount = io.sockets.adapter.rooms.get("global-chat")?.size || 0;
+    io.to("global-chat").emit("global-online-count", globalCount);
+  });
+
+  socket.on("send-global-message", async ({ content }) => {
+    try {
+      const userInfo = onlineUsers.get(socket.id);
+      if (!userInfo) return;
+
+      const tempId = new (require("mongoose")).Types.ObjectId();
+      const timestamp = new Date();
+
+      const msgObj = {
+        _id: tempId,
+        sender: {
+          _id: userInfo.userId,
+          name: userInfo.userName,
+          email: userInfo.email,
+          avatar: userInfo.avatar,
+          emojiAvatar: userInfo.emojiAvatar,
+        },
+        content: content.trim().slice(0, 500),
+        timestamp,
+      };
+
+      // 1. Emit instantly (sub-millisecond!)
+      io.to("global-chat").emit("receive-global-message", msgObj);
+
+      // 2. Push to in-memory cache
+      if (global.globalMessagesCache) {
+        global.globalMessagesCache.push(msgObj);
+        if (global.globalMessagesCache.length > 100) {
+          global.globalMessagesCache.shift();
+        }
+      }
+
+      // 3. Persist to MongoDB in the background (non-blocking!)
+      GlobalMessage.create({
+        _id: tempId,
+        sender: userInfo.userId,
+        content: content.trim().slice(0, 500),
+        timestamp,
+      }).then(async () => {
+        const count = await GlobalMessage.countDocuments();
+        if (count > 100) {
+          const oldest = await GlobalMessage.find({}).sort({ timestamp: 1 }).limit(count - 100);
+          const idsToDelete = oldest.map((m) => m._id);
+          await GlobalMessage.deleteMany({ _id: { $in: idsToDelete } });
+        }
+      }).catch(err => console.error("[Socket] Global DB save error:", err.message));
+
+    } catch (err) {
+      console.error("[Socket] Global message error:", err.message);
+    }
+  });
+
+  socket.on("global-typing", ({ isTyping }) => {
+    const userInfo = onlineUsers.get(socket.id);
+    if (userInfo) {
+      socket.to("global-chat").emit("global-user-typing", {
+        userId: userInfo.userId,
+        userName: userInfo.userName,
+        isTyping,
+      });
+    }
+  });
+
   // ── WebRTC Voice Channel Events ──
   socket.on("join-voice", (groupId) => {
     if (!voiceRooms.has(groupId)) {
@@ -295,6 +391,11 @@ io.on("connection", async (socket) => {
     });
 
     onlineUsers.delete(socket.id);
+    
+    // Update global chat online count
+    const globalCount = io.sockets.adapter.rooms.get("global-chat")?.size || 0;
+    io.to("global-chat").emit("global-online-count", globalCount);
+    
     console.log(`[Socket] User disconnected: ${userId}`);
   });
 });

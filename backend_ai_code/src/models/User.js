@@ -25,6 +25,10 @@ const userSchema = mongoose.Schema(
     avatar: {
       type: String,
     },
+    emojiAvatar: {
+      type: String,
+      default: "😀",
+    },
     role: {
       type: String,
       default: "user",

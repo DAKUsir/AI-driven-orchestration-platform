@@ -7,7 +7,7 @@ const getLeaderboard = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 50;
     const users = await User.find({})
-      .select("name email avatar totalSolved streak longestStreak points")
+      .select("name email avatar emojiAvatar totalSolved streak longestStreak points college bio skills strongTopics leetcodeUsername gfgUsername githubUsername")
       .lean();
 
     const leaderboard = users.map((user) => ({
@@ -15,9 +15,18 @@ const getLeaderboard = async (req, res) => {
       name: user.name,
       email: user.email,
       avatar: user.avatar,
+      emojiAvatar: user.emojiAvatar || "😀",
       points: user.points || 0,
       streak: user.streak || 0,
+      longestStreak: user.longestStreak || 0,
       totalSolved: user.totalSolved || 0,
+      college: user.college || "",
+      bio: user.bio || "",
+      skills: user.skills || [],
+      strongTopics: user.strongTopics || [],
+      leetcodeUsername: user.leetcodeUsername || "",
+      gfgUsername: user.gfgUsername || "",
+      githubUsername: user.githubUsername || "",
     }));
 
     leaderboard.sort((a, b) => b.points - a.points);
@@ -32,7 +41,7 @@ const getLeaderboard = async (req, res) => {
 const getUserRank = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select("name email avatar totalSolved streak longestStreak points")
+      .select("name email avatar emojiAvatar totalSolved streak longestStreak points")
       .lean();
 
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -43,9 +52,11 @@ const getUserRank = async (req, res) => {
     res.json({
       _id: user._id,
       name: user.name,
+      emojiAvatar: user.emojiAvatar || "😀",
       points: userPoints,
       rank: higherCount + 1,
       streak: user.streak || 0,
+      longestStreak: user.longestStreak || 0,
       totalSolved: user.totalSolved || 0,
     });
   } catch (error) {
@@ -62,7 +73,7 @@ const getGroupLeaderboard = async (req, res) => {
       return res.status(403).json({ message: "Not a member" });
 
     const members = await User.find({ _id: { $in: group.members } })
-      .select("name email avatar totalSolved streak points")
+      .select("name email avatar emojiAvatar totalSolved streak longestStreak points college")
       .lean();
 
     const leaderboard = members.map((user) => ({
@@ -70,9 +81,12 @@ const getGroupLeaderboard = async (req, res) => {
       name: user.name,
       email: user.email,
       avatar: user.avatar,
+      emojiAvatar: user.emojiAvatar || "😀",
       points: user.points || 0,
       streak: user.streak || 0,
+      longestStreak: user.longestStreak || 0,
       totalSolved: user.totalSolved || 0,
+      college: user.college || "",
     }));
 
     leaderboard.sort((a, b) => b.points - a.points);
@@ -84,3 +98,4 @@ const getGroupLeaderboard = async (req, res) => {
 };
 
 module.exports = { getLeaderboard, getUserRank, getGroupLeaderboard };
+

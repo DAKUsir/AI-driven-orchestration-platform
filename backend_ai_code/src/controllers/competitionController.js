@@ -180,6 +180,31 @@ const seedCompetitions = async (req, res) => {
   }
 };
 
+// @desc    Refresh competitions — re-seed + remove old past competitions
+// @route   POST /api/competitions/refresh
+// @access  Private
+const refreshCompetitions = async (req, res) => {
+  try {
+    // Remove past competitions older than 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const { deletedCount } = await Competition.deleteMany({
+      endTime: { $lt: sevenDaysAgo },
+    });
+
+    // Re-seed fresh data
+    const seeded = await _doSeedCompetitions();
+
+    res.json({
+      message: `Refreshed: ${seeded} new competitions added, ${deletedCount} old removed`,
+      seeded,
+      removed: deletedCount,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // ── Helpers for recurring contest dates ──
 function _nextSunday(hour, min) {
   const d = new Date();
@@ -202,4 +227,4 @@ function _nextWednesday(hour, min) {
   return d;
 }
 
-module.exports = { getCompetitions, setReminder, removeReminder, seedCompetitions };
+module.exports = { getCompetitions, setReminder, removeReminder, seedCompetitions, refreshCompetitions };

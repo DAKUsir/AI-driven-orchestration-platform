@@ -1,4 +1,5 @@
 const GroupChat = require("../models/GroupChat");
+const GlobalMessage = require("../models/GlobalMessage");
 const User = require("../models/User");
 const crypto = require("crypto");
 const { getIO } = require("../utils/ioSingleton");
@@ -265,6 +266,95 @@ const getGroupDetails = async (req, res) => {
   }
 };
 
+// ── Global Chat ──────────────────────────────────────────────────────
+
+// @desc    Get last 100 global messages
+// @route   GET /api/groups/global/messages
+// @access  Private
+const getGlobalMessages = async (req, res) => {
+  try {
+    if (global.globalMessagesCache && global.globalMessagesCache.length > 0) {
+      return res.json(global.globalMessagesCache);
+    }
+
+    const messages = await GlobalMessage.find({})
+      .sort({ timestamp: -1 })
+      .limit(100)
+      .populate("sender", "name email avatar emojiAvatar")
+      .lean();
+
+    const chronological = messages.reverse();
+    global.globalMessagesCache = chronological;
+    res.json(chronological);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Send a global message (REST fallback)
+// @route   POST /api/groups/global/messages
+// @access  Private
+const sendGlobalMessage = async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: "Message content is required" });
+    }
+
+    const sender = await User.findById(req.user.id).select("name email avatar emojiAvatar");
+    if (!sender) return res.status(404).json({ message: "User not found" });
+
+    const tempId = new (require("mongoose")).Types.ObjectId();
+    const timestamp = new Date();
+
+    const populated = {
+      _id: tempId,
+      sender: {
+        _id: sender._id,
+        name: sender.name,
+        email: sender.email,
+        avatar: sender.avatar,
+        emojiAvatar: sender.emojiAvatar || "😀",
+      },
+      content: content.trim().slice(0, 500),
+      timestamp,
+    };
+
+    // 1. Instantly emit to all connected WebSockets
+    const io = getIO();
+    if (io) {
+      io.to("global-chat").emit("receive-global-message", populated);
+    }
+
+    // 2. Instantly update global cache
+    if (global.globalMessagesCache) {
+      global.globalMessagesCache.push(populated);
+      if (global.globalMessagesCache.length > 100) {
+        global.globalMessagesCache.shift();
+      }
+    }
+
+    // 3. Write to DB asynchronously in background
+    GlobalMessage.create({
+      _id: tempId,
+      sender: req.user.id,
+      content: content.trim().slice(0, 500),
+      timestamp,
+    }).then(async () => {
+      const count = await GlobalMessage.countDocuments();
+      if (count > 100) {
+        const oldest = await GlobalMessage.find({}).sort({ timestamp: 1 }).limit(count - 100);
+        const idsToDelete = oldest.map((m) => m._id);
+        await GlobalMessage.deleteMany({ _id: { $in: idsToDelete } });
+      }
+    }).catch(err => console.error("[REST] Global DB save error:", err.message));
+
+    res.status(201).json(populated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createGroup,
   joinGroup,
@@ -273,5 +363,7 @@ module.exports = {
   getGroupMessages,
   getGroupDetails,
   sendMessage,
+  getGlobalMessages,
+  sendGlobalMessage,
 };
 

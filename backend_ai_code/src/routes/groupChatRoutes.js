@@ -8,8 +8,14 @@ const {
   getGroupMessages,
   getGroupDetails,
   sendMessage,
+  getGlobalMessages,
+  sendGlobalMessage,
 } = require("../controllers/groupChatController");
 const { protect } = require("../middleware/authMiddleware");
+
+// Global chat routes (must be before /:id routes)
+router.get("/global/messages", protect, getGlobalMessages);
+router.post("/global/messages", protect, sendGlobalMessage);
 
 router.get("/", protect, getMyGroups);
 router.post("/", protect, createGroup);

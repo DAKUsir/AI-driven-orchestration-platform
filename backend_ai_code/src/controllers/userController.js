@@ -44,6 +44,7 @@ const updateUserProfile = async (req, res) => {
       if (req.body.leetcodeUsername !== undefined) user.leetcodeUsername = req.body.leetcodeUsername;
       if (req.body.gfgUsername !== undefined) user.gfgUsername = req.body.gfgUsername;
       if (req.body.githubUsername !== undefined) user.githubUsername = req.body.githubUsername;
+      if (req.body.emojiAvatar !== undefined) user.emojiAvatar = req.body.emojiAvatar;
 
       const updatedUser = await user.save();
 
@@ -70,6 +71,25 @@ const getUserStats = async (req, res) => {
     } else {
       res.status(404).json({ message: "User not found" });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get public profile of any user (for leaderboard)
+// @route   GET /api/users/:id/public-profile
+// @access  Private
+const getPublicProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select("name username email avatar emojiAvatar bio college graduationYear targetRole experienceLevel skills weakTopics strongTopics streak longestStreak totalSolved totalStudyHours points leetcodeUsername gfgUsername githubUsername lastActive createdAt")
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -105,5 +125,6 @@ module.exports = {
   getUserProfile,
   updateUserProfile,
   getUserStats,
+  getPublicProfile,
   setAiProviderKey,
 };
