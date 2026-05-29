@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   PlayCircle, BookOpen, Clock, Loader2, CheckCircle, Search,
-  Plus, X, Trash2, ExternalLink, Filter, TrendingUp, AlertCircle, Video, BookOpen as BookOpenIcon, GraduationCap, Library, Palette, Book
+  Plus, X, Trash2, ExternalLink, Filter, TrendingUp, AlertCircle, Video, BookOpen as BookOpenIcon, GraduationCap, Library, Palette, Book,
+  ChevronUp, ChevronDown
 } from 'lucide-react'
 import useCourseStore from '../store/useCourseStore'
 

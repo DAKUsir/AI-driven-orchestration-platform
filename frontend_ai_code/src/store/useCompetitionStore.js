@@ -4,6 +4,7 @@ import api from '../utils/api'
 const useCompetitionStore = create((set) => ({
   competitions: [],
   loading: false,
+  refreshing: false,
 
   fetchCompetitions: async (filters = {}) => {
     set({ loading: true })
@@ -20,6 +21,24 @@ const useCompetitionStore = create((set) => ({
       set({ competitions: unique, loading: false })
     } catch {
       set({ loading: false })
+    }
+  },
+
+  refreshCompetitions: async () => {
+    set({ refreshing: true })
+    try {
+      await api.post('/competitions/refresh')
+      // Re-fetch after refresh
+      const res = await api.get('/competitions?status=upcoming')
+      const seen = new Set()
+      const unique = res.data.filter(c => {
+        if (seen.has(c._id)) return false
+        seen.add(c._id)
+        return true
+      })
+      set({ competitions: unique, refreshing: false })
+    } catch {
+      set({ refreshing: false })
     }
   },
 

@@ -101,9 +101,9 @@ const useTaskStore = create((set, get) => ({
       set({ error: err.message })
     }
   },
-  generateTasksWithAI: async (goal, category, count = 5) => {
+  generateTasksWithAI: async ({ goal, category, count = 5, deadline }) => {
     try {
-      const res = await api.post('/ai/generate-tasks', { goal, category, count })
+      const res = await api.post('/ai/generate-tasks', { goal, category, count, deadline })
       const aiTasks = res.data.tasks || []
       const created = []
       for (const task of aiTasks) {

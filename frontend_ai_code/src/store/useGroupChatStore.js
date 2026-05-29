@@ -5,6 +5,7 @@ import api from '../utils/api'
 let socket = null
 
 const useGroupChatStore = create((set, get) => ({
+  // ── Group Chat State ──
   groups: [],
   activeGroup: null,
   messages: [],
@@ -14,6 +15,16 @@ const useGroupChatStore = create((set, get) => ({
   messagesLoading: false,
   error: null,
   hasMore: false,
+
+  // ── Global Chat State ──
+  globalMessages: [],
+  globalTypingUsers: [],
+  globalOnlineCount: 0,
+  globalLoading: false,
+
+  // ── Active View ──
+  activeView: 'global', // 'global' | 'groups'
+  setActiveView: (view) => set({ activeView: view }),
 
   connectSocket: () => {
     if (socket) return
@@ -29,8 +40,11 @@ const useGroupChatStore = create((set, get) => ({
 
     socket.on('connect', () => {
       console.log('Socket connected')
+      // Auto-join global chat room
+      socket.emit('join-global')
     })
 
+    // Group chat listeners
     socket.on('receive-message', (message) => {
       set((state) => ({ messages: [...state.messages, message] }))
     })
@@ -53,10 +67,35 @@ const useGroupChatStore = create((set, get) => ({
     socket.on('system-message', (message) => {
       set((state) => ({ messages: [...state.messages, message] }))
     })
+
+    // Global chat listeners
+    socket.on('receive-global-message', (message) => {
+      set((state) => {
+        const newMessages = [...state.globalMessages, message]
+        // Keep only last 100 on the client side too
+        return { globalMessages: newMessages.slice(-100) }
+      })
+    })
+
+    socket.on('global-user-typing', ({ userId, userName, isTyping }) => {
+      set((state) => {
+        if (isTyping && !state.globalTypingUsers.find(u => u.userId === userId)) {
+          return { globalTypingUsers: [...state.globalTypingUsers, { userId, userName }] }
+        } else if (!isTyping) {
+          return { globalTypingUsers: state.globalTypingUsers.filter((u) => u.userId !== userId) }
+        }
+        return state
+      })
+    })
+
+    socket.on('global-online-count', (count) => {
+      set({ globalOnlineCount: count })
+    })
   },
 
   disconnectSocket: () => {
     if (socket) {
+      socket.emit('leave-global')
       socket.disconnect()
       socket = null
     }
@@ -64,6 +103,32 @@ const useGroupChatStore = create((set, get) => ({
 
   getSocket: () => socket,
 
+  // ── Global Chat Actions ──
+  fetchGlobalMessages: async () => {
+    set({ globalLoading: true })
+    try {
+      const { data } = await api.get('/groups/global/messages')
+      set({ globalMessages: data, globalLoading: false })
+    } catch (err) {
+      console.error('Failed to fetch global messages:', err)
+      set({ globalLoading: false })
+    }
+  },
+
+  sendGlobalMessage: (content) => {
+    if (!content.trim()) return
+    if (socket) {
+      socket.emit('send-global-message', { content })
+    }
+  },
+
+  sendGlobalTyping: (isTyping) => {
+    if (socket) {
+      socket.emit('global-typing', { isTyping })
+    }
+  },
+
+  // ── Group Chat Actions ──
   fetchGroups: async () => {
     set({ loading: true })
     try {

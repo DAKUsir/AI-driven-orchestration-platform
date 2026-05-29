@@ -9,6 +9,11 @@ const useLeaderboardStore = create((set) => ({
   activeTab: 'global', // global | group
   selectedGroupId: null,
 
+  // User profile panel
+  selectedUser: null,
+  selectedUserLoading: false,
+  showProfilePanel: false,
+
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedGroupId: (id) => set({ selectedGroupId: id }),
 
@@ -38,6 +43,18 @@ const useLeaderboardStore = create((set) => ({
       set({ loading: false })
     }
   },
+
+  fetchUserProfile: async (userId) => {
+    set({ selectedUserLoading: true, showProfilePanel: true })
+    try {
+      const { data } = await api.get(`/users/${userId}/public-profile`)
+      set({ selectedUser: data, selectedUserLoading: false })
+    } catch {
+      set({ selectedUserLoading: false })
+    }
+  },
+
+  closeProfilePanel: () => set({ showProfilePanel: false, selectedUser: null }),
 }))
 
 export default useLeaderboardStore

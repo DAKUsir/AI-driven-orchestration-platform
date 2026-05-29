@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Trophy, Crown, Medal, TrendingUp, Loader2, Users, Globe2 } from 'lucide-react'
+import { Trophy, Crown, Medal, TrendingUp, Loader2, Users, Globe2, Flame, Code2 } from 'lucide-react'
 import useLeaderboardStore from '../store/useLeaderboardStore'
 import useAuthStore from '../store/useAuthStore'
+import UserProfilePanel from '../components/UserProfilePanel'
 import api from '../utils/api'
 
 export default function LeaderboardPage() {
@@ -10,6 +11,7 @@ export default function LeaderboardPage() {
     entries, groupEntries, myRank, loading, activeTab,
     fetchLeaderboard, fetchMyRank, fetchGroupLeaderboard,
     setActiveTab, setSelectedGroupId, selectedGroupId,
+    fetchUserProfile,
   } = useLeaderboardStore()
   const { user } = useAuthStore()
 
@@ -42,65 +44,41 @@ export default function LeaderboardPage() {
 
   const displayEntries = activeTab === 'global' ? entries : groupEntries
 
-  const getRankBadge = (i) => {
-    if (i === 0) return { icon: <Crown className="w-4 h-4" />, bg: 'bg-amber-500/15 text-amber-400' }
-    if (i === 1) return { icon: <Medal className="w-4 h-4" />, bg: 'bg-zinc-400/15 text-zinc-300' }
-    if (i === 2) return { icon: <Medal className="w-4 h-4" />, bg: 'bg-orange-500/15 text-orange-400' }
-    return { icon: <span className="text-xs font-bold">{i + 1}</span>, bg: 'bg-zinc-800 text-zinc-500' }
+  const handleUserClick = (userId) => {
+    if (userId) fetchUserProfile(userId)
   }
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <UserProfilePanel />
+
       <div>
-        <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Leaderboard</h1>
-        <p className="text-sm text-zinc-500 mt-1">Compete with others and earn points by completing tasks</p>
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Leaderboard</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Compete with others and earn points by completing tasks</p>
       </div>
 
       {/* Tabs */}
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => setActiveTab('global')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
-            activeTab === 'global'
-              ? 'bg-orange-500/10 text-orange-400 border-orange-500/25'
-              : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
-          }`}
-        >
-          <Globe2 className="w-4 h-4" />
-          Global
+        <button onClick={() => setActiveTab('global')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${activeTab === 'global' ? 'border-orange-500/25' : 'border-zinc-800 hover:border-zinc-700'}`}
+          style={activeTab === 'global' ? { background: 'rgba(249,115,22,0.1)', color: '#f97316' } : { color: 'var(--text-muted)' }}>
+          <Globe2 className="w-4 h-4" /> Global
         </button>
-        <button
-          onClick={() => setActiveTab('group')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${
-            activeTab === 'group'
-              ? 'bg-orange-500/10 text-orange-400 border-orange-500/25'
-              : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
-          }`}
-        >
-          <Users className="w-4 h-4" />
-          My Groups
+        <button onClick={() => setActiveTab('group')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${activeTab === 'group' ? 'border-orange-500/25' : 'border-zinc-800 hover:border-zinc-700'}`}
+          style={activeTab === 'group' ? { background: 'rgba(249,115,22,0.1)', color: '#f97316' } : { color: 'var(--text-muted)' }}>
+          <Users className="w-4 h-4" /> My Groups
         </button>
       </div>
 
       {/* Group Selector */}
       {activeTab === 'group' && (
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {groups.length === 0 && !groupsLoading && (
-            <p className="text-sm text-zinc-500">No groups yet. Create or join a group to see group rankings.</p>
-          )}
+          {groups.length === 0 && !groupsLoading && <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No groups yet.</p>}
           {groups.map((g) => (
-            <button
-              key={g._id}
-              onClick={() => {
-                setSelectedGroupId(g._id)
-                fetchGroupLeaderboard(g._id)
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border ${
-                selectedGroupId === g._id
-                  ? 'bg-orange-500/12 text-orange-400 border-orange-500/25'
-                  : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 hover:border-zinc-700'
-              }`}
-            >
+            <button key={g._id} onClick={() => { setSelectedGroupId(g._id); fetchGroupLeaderboard(g._id) }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border ${selectedGroupId === g._id ? 'border-orange-500/25' : 'border-zinc-800 hover:border-zinc-700'}`}
+              style={selectedGroupId === g._id ? { background: 'rgba(249,115,22,0.12)', color: '#f97316' } : { color: 'var(--text-muted)' }}>
               {g.name}
             </button>
           ))}
@@ -109,22 +87,24 @@ export default function LeaderboardPage() {
 
       {/* Your rank */}
       {myRank && activeTab === 'global' && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card p-5 flex items-center gap-4 border-orange-500/15"
-        >
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center text-lg font-bold text-white">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card p-5 flex items-center gap-4" style={{ borderColor: 'rgba(249,115,22,0.15)' }}>
+          <div className="text-3xl">{myRank.emojiAvatar || '😀'}</div>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold text-white" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}>
             #{myRank.rank}
           </div>
-          <div>
-            <p className="text-xs text-zinc-500">Your Rank</p>
-            <p className="text-lg font-bold text-zinc-100">{myRank.name} — <span className="text-amber-400">{myRank.points} pts</span></p>
+          <div className="flex-1">
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your Rank</p>
+            <p className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{myRank.name}</p>
+          </div>
+          <div className="flex items-center gap-4 text-sm">
+            <span className="flex items-center gap-1" style={{ color: '#f59e0b' }}><Trophy className="w-4 h-4" />{myRank.points}</span>
+            <span className="flex items-center gap-1" style={{ color: '#ef4444' }}><Flame className="w-4 h-4" />{myRank.streak}</span>
+            <span className="flex items-center gap-1" style={{ color: '#10b981' }}><Code2 className="w-4 h-4" />{myRank.totalSolved}</span>
           </div>
         </motion.div>
       )}
 
-      {/* Podium — Top 3 */}
+      {/* Podium */}
       {displayEntries.length >= 3 && (
         <div className="grid grid-cols-3 gap-3">
           {[displayEntries[1], displayEntries[0], displayEntries[2]].map((entry, displayIdx) => {
@@ -132,20 +112,18 @@ export default function LeaderboardPage() {
             const heights = ['h-24', 'h-32', 'h-20']
             const colors = ['from-zinc-400 to-zinc-500', 'from-amber-400 to-amber-500', 'from-orange-400 to-orange-500']
             return (
-              <motion.div
-                key={entry._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: displayIdx * 0.1 }}
-                className="card p-4 flex flex-col items-center text-center"
-              >
-                <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${colors[displayIdx]} flex items-center justify-center text-sm font-bold text-white mb-2`}>
-                  {entry.name?.charAt(0)?.toUpperCase() || 'U'}
+              <motion.div key={entry._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: displayIdx * 0.1 }}
+                className="card p-4 flex flex-col items-center text-center cursor-pointer hover:border-orange-500/20 transition-colors"
+                onClick={() => handleUserClick(entry._id)}>
+                <div className="text-3xl mb-1">{entry.emojiAvatar || '😀'}</div>
+                <p className="text-sm font-semibold truncate w-full" style={{ color: 'var(--text-primary)' }}>{entry.name}</p>
+                {entry.college && <p className="text-[10px] truncate w-full" style={{ color: 'var(--text-faint)' }}>{entry.college}</p>}
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs font-bold" style={{ color: '#f59e0b' }}>{entry.points} pts</span>
+                  <span className="text-[10px] flex items-center gap-0.5" style={{ color: '#ef4444' }}><Flame className="w-3 h-3" />{entry.streak}</span>
                 </div>
-                <p className="text-sm font-semibold text-zinc-200 truncate w-full">{entry.name}</p>
-                <p className="text-xs font-bold text-amber-400 mt-0.5">{entry.points} pts</p>
                 <div className={`w-full ${heights[displayIdx]} bg-gradient-to-t from-zinc-800/50 to-transparent rounded-lg mt-3 flex items-end justify-center pb-2`}>
-                  <span className="text-2xl font-bold text-zinc-600">#{actualIdx + 1}</span>
+                  <span className="text-2xl font-bold" style={{ color: 'var(--text-faint)' }}>#{actualIdx + 1}</span>
                 </div>
               </motion.div>
             )
@@ -153,12 +131,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
-        </div>
-      )}
+      {loading && <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin" style={{ color: '#f97316' }} /></div>}
 
       {/* Remaining entries */}
       {!loading && (
@@ -167,29 +140,30 @@ export default function LeaderboardPage() {
             const rank = i + 4
             const isYou = entry._id === user?._id
             return (
-              <motion.div
-                key={entry._id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.02 }}
-                className={`card p-4 flex items-center gap-4 ${isYou ? 'border-orange-500/20' : ''}`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${getRankBadge(rank - 1).bg}`}>
+              <motion.div key={entry._id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}
+                className={`card p-4 flex items-center gap-4 cursor-pointer hover:border-orange-500/20 transition-colors ${isYou ? 'border-orange-500/20' : ''}`}
+                onClick={() => handleUserClick(entry._id)}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                  style={{ background: rank <= 3 ? 'rgba(249,115,22,0.15)' : 'var(--bg-elevated)', color: rank <= 3 ? '#f97316' : 'var(--text-muted)' }}>
                   {rank}
                 </div>
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-orange-500 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
-                  {entry.name?.charAt(0)?.toUpperCase() || 'U'}
-                </div>
+                <div className="text-xl">{entry.emojiAvatar || '😀'}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-200 truncate">
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                     {entry.name}
                     {isYou && <span className="ml-2 badge badge-accent text-[10px]">You</span>}
                   </p>
-                  <p className="text-xs text-zinc-600 truncate">{entry.email}</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--text-faint)' }}>
+                    {entry.college || entry.email}
+                    {entry.totalSolved > 0 && <span className="ml-2">{entry.totalSolved} solved</span>}
+                  </p>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-sm font-bold text-amber-400">{entry.points}</span>
+                <div className="flex items-center gap-3">
+                  {entry.streak > 0 && <span className="text-xs flex items-center gap-0.5" style={{ color: '#ef4444' }}><Flame className="w-3.5 h-3.5" />{entry.streak}</span>}
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5" style={{ color: '#f59e0b' }} />
+                    <span className="text-sm font-bold" style={{ color: '#f59e0b' }}>{entry.points}</span>
+                  </div>
                 </div>
               </motion.div>
             )
@@ -197,9 +171,9 @@ export default function LeaderboardPage() {
 
           {displayEntries.length === 0 && !loading && (
             <div className="card p-12 text-center">
-              <Trophy className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-              <p className="text-sm text-zinc-500">
-                {activeTab === 'group' ? 'No group members found. Select a group above.' : 'No leaderboard data yet. Complete tasks to earn points!'}
+              <Trophy className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--text-faint)' }} />
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                {activeTab === 'group' ? 'No group members found.' : 'No leaderboard data yet.'}
               </p>
             </div>
           )}

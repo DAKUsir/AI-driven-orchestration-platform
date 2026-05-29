@@ -49,7 +49,13 @@ export default function TaskPlannerPage() {
   // AI state
   const [aiGoal, setAiGoal]         = useState('')
   const [aiCategory, setAiCategory] = useState('other')
+  const [aiIntensity, setAiIntensity]= useState('balanced')
   const [aiCount, setAiCount]       = useState(5)
+  const [aiDeadline, setAiDeadline] = useState(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 7)
+    return d.toISOString().split('T')[0]
+  })
   const [aiLoading, setAiLoading]   = useState(false)
   const [aiResult, setAiResult]     = useState(null)
   const [aiError, setAiError]       = useState('')
@@ -86,12 +92,34 @@ export default function TaskPlannerPage() {
   }
 
   const handleAIGenerate = async () => {
-    if (!aiGoal.trim()) return
+    if (!aiGoal.trim()) {
+      setAiError('Please provide a goal.')
+      return
+    }
     setAiLoading(true)
     setAiError('')
     setAiResult(null)
+    
+    // Calculate count based on intensity and deadline
+    const today = new Date()
+    const deadlineDate = new Date(aiDeadline)
+    const daysFromNow = Math.max(1, Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24)))
+    
+    let finalCount = aiCount
+    if (aiIntensity !== 'custom') {
+      if (aiIntensity === 'relaxed') finalCount = Math.max(2, Math.floor(daysFromNow / 3))
+      if (aiIntensity === 'balanced') finalCount = Math.max(3, Math.floor(daysFromNow / 2))
+      if (aiIntensity === 'intensive') finalCount = Math.max(5, daysFromNow)
+      finalCount = Math.min(15, finalCount)
+    }
+
     try {
-      const created = await generateTasksWithAI(aiGoal.trim(), aiCategory, aiCount)
+      const created = await generateTasksWithAI({
+        goal: aiGoal.trim(), 
+        category: aiCategory, 
+        count: finalCount, 
+        deadline: aiDeadline
+      })
       setAiResult(created.length)
     } catch (err) {
       setAiError(err.response?.data?.message || 'Failed to generate tasks. Try again.')
@@ -446,26 +474,72 @@ export default function TaskPlannerPage() {
                       style={{ minHeight: 80, resize: 'none' }}
                     />
                   </div>
+                  <div>
+                    <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
+                      Category
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {categoryOptions.map(cat => (
+                        <button
+                          key={cat.value}
+                          type="button"
+                          onClick={() => setAiCategory(cat.value)}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all border ${
+                            aiCategory === cat.value 
+                              ? 'bg-orange-500/10 border-orange-500/50 text-orange-500 shadow-sm' 
+                              : 'bg-transparent border-zinc-700/50 text-zinc-400 hover:border-zinc-500 hover:text-zinc-300'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-                        Category
+                        Target Deadline
                       </label>
-                      <select value={aiCategory} onChange={e => setAiCategory(e.target.value)} className="input text-sm">
-                        {categoryOptions.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                      </select>
+                      <input
+                        type="date"
+                        value={aiDeadline}
+                        onChange={e => setAiDeadline(e.target.value)}
+                        className="input text-sm"
+                      />
                     </div>
                     <div>
                       <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
-                        Number of tasks
+                        Intensity
                       </label>
-                      <input
-                        type="number" value={aiCount}
-                        onChange={e => setAiCount(Math.min(15, Math.max(1, parseInt(e.target.value) || 5)))}
-                        className="input text-sm" min={1} max={15}
-                      />
+                      <select value={aiIntensity} onChange={e => setAiIntensity(e.target.value)} className="input text-sm">
+                        <option value="relaxed">Relaxed (~1 task/3 days)</option>
+                        <option value="balanced">Balanced (~1 task/2 days)</option>
+                        <option value="intensive">Intensive (~1 task/day)</option>
+                        <option value="custom">Exact Amount</option>
+                      </select>
                     </div>
                   </div>
+                  <AnimatePresence>
+                    {aiIntensity === 'custom' && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pt-1">
+                          <label className="text-xs font-medium mb-1.5 block" style={{ color: 'var(--text-secondary)' }}>
+                            Number of tasks
+                          </label>
+                          <input
+                            type="number" value={aiCount}
+                            onChange={e => setAiCount(Math.min(15, Math.max(1, parseInt(e.target.value) || 5)))}
+                            className="input text-sm w-full" min={1} max={15}
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {aiError && (
                     <p className="text-sm" style={{ color: 'var(--danger)' }}>{aiError}</p>
